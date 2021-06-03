@@ -3,7 +3,7 @@ pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 
-contract ChangeMakers is Ownable {
+contract ChangeMakers is IChangeMakers, Ownable {
   //This structure holds data about a registered changeMaker
   struct ChangeMaker {
     address organization;
@@ -17,6 +17,22 @@ contract ChangeMakers is Ownable {
   mapping (address => bool) isAuthenticated;
   //?????? is an array a good way to store a reference to the changeMakers????
   ChangeMaker[] public changeMakerArray;
+
+  event AddedChangeMaker(
+    address _organization,
+    bytes32 _name,
+    uint256 _registrationTime
+  );
+
+  event ChangeMakerAuthorized(
+    address _organization,
+    bytes32 _name
+  );
+
+  event ChangeMakerAuthorizationRemoved(
+    address _organization,
+    bytes32 _name
+  );
 
   //This is called by the changeMaker only after their registration has been reviewed and ChangeDAO has called authorize() to authorize the changeMaker.
   function addChangeMaker(
@@ -35,17 +51,19 @@ contract ChangeMakers is Ownable {
   }
 
   //ChangeDAO calls this function to give a changeMaker permission to create a ChangeMaker struct
-  function authorize(address _changeMaker) public onlyOwner {
+  function authorize(address _changeMaker) public onlyOwner returns (bool) {
     isAuthenticated[_changeMaker] = true;
+    return true;
   }
 
   //ChangeDAO can check a changeMaker's authentication status
-  function checkAuthentication(address _changeMaker) public onlyOwner returns (bool){
+  function checkAuthorization(address _changeMaker) public onlyOwner returns (bool){
     return isAuthenticated[_changeMaker];
   }
 
   //ChangeDAO can remove a changeMaker's authentication
-  function removeAuthorization(address _changeMaker) public onlyOwner {
+  function removeAuthorization(address _changeMaker) public onlyOwner returns (bool) {
     isAuthenticated[_changeMaker] = false;
+    return true;
   }
 }

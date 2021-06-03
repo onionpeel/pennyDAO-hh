@@ -2,3 +2,5 @@
 https://docs.openzeppelin.com/contracts/4.x/api/access
 
 2. What is the proper natspec format for documenting?
+
+3. What event items should be indexed?

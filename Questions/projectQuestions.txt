@@ -3,3 +3,10 @@
   b) What data needs to be stored on the blockchain about:
     i) the changeMakers
     ii) the projects created by changeMakers
+
+2.  Flowchart change:
+  Sponsor does not actually send ERC20 tokens to the project.
+  --Need to figure out how this will work in the smart contracts, and then update flow Flowchart
+
+3.  Flowchart change:
+  When the loan is made whole, the Conversion contract interacts with Alchemix to get the stablecoin back.

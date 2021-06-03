@@ -1,0 +1,5 @@
+1.  The registration process and the project creation process both take in input (see the slides to see all of the fields).
+  a) Will this input data be stored on a database?
+  b) What data needs to be stored on the blockchain about:
+    i) the changeMakers
+    ii) the projects created by changeMakers

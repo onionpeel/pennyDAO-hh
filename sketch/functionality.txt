@@ -1,0 +1,10 @@
+NFT generator:
+  (User):
+  create nft
+
+
+
+In the pool:
+  (User):
+  share nft with community
+  withdraw nft from community

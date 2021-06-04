@@ -10,3 +10,5 @@
 
 3.  Flowchart change:
   When the loan is made whole, the Conversion contract interacts with Alchemix to get the stablecoin back.
+
+4. In what sense is ChangeDao a decentralized autonomous organization?  A lot of the control will still be held by the team behind ChangeDao.

@@ -44,7 +44,8 @@ async function main() {
   // const user1 = accounts[0];
   // const user2 = accounts[1];
 
-  await deploy('ChangeMakers');
+  const changeMakers = await deploy('ChangeMakers');
+  const projects = await deploy('Projects', changeMakers.address);
 };
 
 main()

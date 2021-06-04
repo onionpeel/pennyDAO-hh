@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 
 describe('ChangeMakers', () => {
-  let changeMaker, deployer, user1, user2;
+  let changeMakers, deployer, user1, user2;
 
   it('deploys contracts and assigns signers', async () => {
     const accounts = await hre.ethers.getSigners();
@@ -10,14 +10,12 @@ describe('ChangeMakers', () => {
     user2 = accounts[2];
 
     ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
-    changeMaker = await ChangeMakers.deploy();
+    changeMakers = await ChangeMakers.deploy();
   });
 
   it('ChangeMakers: owner()', async () => {
-    const owner = await changeMaker.owner();
+    const owner = await changeMakers.owner();
     expect(owner).to.equal(deployer.address);
   });
-
-  it('ChangeMakers: ')
 
 });

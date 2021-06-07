@@ -3,80 +3,77 @@ pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 
+///@title Create and manage information about the organizations that register as changeMakers
 contract ChangeMakers is Ownable {
-  //This structure holds data about a registered changeMaker
+  ///This structure holds data about a registered changeMaker
   struct ChangeMaker {
     address organization;
     string name;
-    uint256 registrationTime;
+    uint256 changeMakerId;
   }
 
-  //Retrieve a specific ChangeMaker struct based on the changeMaker's address
+  ///@notice Id of the most recently created changeMaker
+  uint256 public changeMakerCount;
+  ///@notice Retrieve a changeMaker address based on the changeMaker's address
+  mapping (uint256 => address) public changeMakerAddress;
+  ///@notice Retrieve a specific ChangeMaker struct based on the changeMaker's address
   mapping (address => ChangeMaker) public changeMakers;
-  //Retrieves whether or not a particular changeMaker is authenticated
+
+  ///@notice Retrieves whether or not a particular changeMaker is authorized
   mapping (address => bool) isAuthorized;
-  //?????? is an array a good way to store a reference to the changeMakers????
-  ChangeMaker[] public changeMakerArray;
 
+  ///@notice Emitted when an organization becomes a changeMaker
   event AddedChangeMaker(
-    address _organization,
-    string _name
+    address indexed organization,
+    string indexed name
+  );
+  ///@notice Emitted when ChangeDao approves an organization's registration
+  event AuthorizedChangeMaker(
+    address indexed organization,
+    string indexed name
+  );
+  ///@notice Emitted when ChangeDao revokes an organization's status as a changeMaker
+  event RemovedChangeMakerAuthorization(
+    address indexed organization,
+    string indexed name
   );
 
-  event ChangeMakerAuthorized(
-    address _organization,
-    string _name
-  );
-
-  event ChangeMakerAuthorizationRemoved(
-    address _organization,
-    string _name
-  );
-
-  //This is called by the changeMaker only after their registration has been reviewed and ChangeDAO has called authorize() to authorize the changeMaker.
+  /*@notice This is called by the changeMaker only after their registration has been reviewed and ChangeDAO has called authorize() to authorize the changeMaker.*/
   function becomeChangeMaker(
-    string memory _name,
-    uint256 _registrationTime
+    string memory name,
   )
     public
     authorized
-    returns (bool)
   {
-    //create struct from input data
+    changeMakerCount++;
     ChangeMaker memory newChangeMaker = ChangeMaker(
       msg.sender,
-      _name,
-      _registrationTime
+      name,
+      changeMakerCount
     );
     //add changeMaker to mapping
     changeMakers[msg.sender] = newChangeMaker;
-    //add changeMaker to array
-    changeMakerArray.push(newChangeMaker);
-
     emit AddedChangeMaker(msg.sender, _name);
-    return true;
   }
 
-  //Check whether a changeMaker is authenticated
+  ///@notice Check whether a changeMaker is authorized
   modifier authorized() {
-    require(isAuthorized[msg.sender]);
+    require(isAuthorized[msg.sender], "Organization must be authorized to register as changeMaker");
     _;
   }
 
-  //ChangeDAO calls this function to give a changeMaker permission to create a ChangeMaker struct
-  function authorize(address _changeMaker) public onlyOwner returns (bool) {
+  /*@notice ChangeDAO calls this function to give a changeMaker permission to create a ChangeMaker struct*/
+  function authorize(address _changeMaker) public onlyOwner {
     isAuthorized[_changeMaker] = true;
-    return true;
   }
 
-  //ChangeDAO can check a changeMaker's authentication status
+  ///@notice ChangeDAO can check a changeMaker's authorized status
   function checkAuthorization(address _changeMaker) public view returns (bool){
     return isAuthorized[_changeMaker];
   }
 
-  //ChangeDAO can remove a changeMaker's authentication
-  function removeAuthorization(address _changeMaker) public onlyOwner returns (bool) {
+  ///@notice ChangeDAO can remove a changeMaker's authorized
+  function removeAuthorization(address _changeMaker) public onlyOwner {
     isAuthorized[_changeMaker] = false;
-    return true;
   }
 }

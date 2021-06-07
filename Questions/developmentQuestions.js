@@ -16,3 +16,7 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
   Use case:  The community could vote to allocate funds from the community fund to a project directly.  Or instead of this, the community could vote to allocate IMPACT to groups/individuals and let them use those tokens as a way to choose which projects receive the community fund money.
 
 7. How to handle the keys of the ChangeDaoTeam and CommunityFund so that if that address needs to change, it can.
+
+
+ChangeMaker.sol
+1. What type of uint should be used for changeMaker ids?

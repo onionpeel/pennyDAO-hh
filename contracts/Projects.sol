@@ -3,55 +3,55 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import './ChangeMakers.sol';
-// import "./IChangeMakers.sol";
 
-
+///@title changeMakers create projects
 contract Projects {
   using Counters for Counters.Counter;
-  //This structure holds the data for a single project created by a changeMaker
+  ///This structure holds the data for a single project created by a changeMaker
   struct Project {
     address changeMaker;
     string name;
     uint256 creationTime;
+    uint256 id;
   }
 
-  //References all of the project ids of a particular changeMaker
-  mapping (address => Project[]) changeMakerProjects;
-  //References a Project struct based on its id
+  ///@notices References all of the project ids of a particular changeMaker
+  mapping (address => uint256[]) changeMakerProjects;
+  ///@notice References a Project struct based on its id
   mapping (uint256 => Project) projectIds;
 
-  uint256 totalProjects;
-  Counters.Counter latestProjectId;
+  Counters.Counter projectCount;
+  uint256 public currentProjectId;
   ChangeMakers changeMakers;
 
   constructor(ChangeMakers _changeMakers) {
     changeMakers = _changeMakers;
   }
 
-  //An authorized changeMaker calls this function to create a new project
+  ///@notice An authorized changeMaker calls this function to create a new project
   function createProject(
-    string memory _name,
-    uint256 _creationTime
+    string memory name
   )
     public
-    returns (bool)
   {
     require(changeMakers.checkAuthorization(msg.sender), 'Not authorized to create a project');
-    latestProjectId.increment();
-    uint256 currentId = latestProjectId.current();
+    projectCount.increment();
+    uint256 _currentId = projectCount.current();
+    currentProjectId = _currentId;
 
     Project memory newProject = Project(
       msg.sender,
-      _name,
-      _creationTime
+      name,
+      block.timestamp,
+      _currentId
     );
 
-    projectIds[currentId] = newProject;
-    changeMakerProjects[msg.sender].push(newProject);
-    return true;
+    projectIds[_currentId] = newProject;
+    changeMakerProjects[msg.sender].push(_currentId);
   }
 
-  function getChangeMakerProjects(address _changeMaker) public view returns (Project[] memory){
-    return changeMakerProjects[_changeMaker];
+  ///@notice Return an array of projects belonging to a specific changeMaker
+  function getChangeMakerProjects(address changeMaker) public view returns (Project[] memory){
+    return changeMakerProjects[changeMaker];
   }
 }

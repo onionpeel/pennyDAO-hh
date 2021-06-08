@@ -21,7 +21,7 @@ contract Projects is Sponsors {
     bool fullyFunded;
     bool hasMinted;
     bool hasSetSponsorRanks;
-    mapping (uint256 => Sponsor) sponsors;
+    Sponsor[] sponsors;
   }
 
   ///@notices References all of the project ids of a particular changeMaker
@@ -39,7 +39,9 @@ contract Projects is Sponsors {
 
   ///@notice An authorized changeMaker calls this function to create a new project
   function createProject(
-    string memory name
+    string memory name,
+    uint256 expirationTime,
+    uint256 fundingThreshold,
   )
     public
   {
@@ -49,10 +51,18 @@ contract Projects is Sponsors {
     currentProjectId = _currentId;
 
     Project memory newProject = Project(
-      msg.sender,
-      name,
-      block.timestamp,
-      _currentId
+      msg.sender,  //changeMaker
+      name,  //name
+      block.timestamp,  //creationTime
+      expirationTime,  //expirationTime
+      _currentId, //id
+      fundingThreshold, //fundingThreshold
+      0, //currentFunding
+      0, //numberOfFunders
+      false, //fullyFunded
+      false, //hasMinted
+      false, //hasSetSponsorRanks
+      Sponsor[] //array of sponsors
     );
 
     projectIds[_currentId] = newProject;

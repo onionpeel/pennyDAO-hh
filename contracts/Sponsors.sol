@@ -8,6 +8,7 @@ abstract contract Sponsors {
   struct Sponsor {
     address sponsorAddress;
     uint256 projectId;
+    uint256 sponsorId;
     uint256 fundingAmount;
     uint256 percentOfProjectFunding;
     uint256 fundingRank;
@@ -20,7 +21,9 @@ abstract contract Sponsors {
   );
 
   ///@notice Holds an array of the project ids of a specific sponsor
-  mapping (address => uint256[]) projectsOfASponsor;
+  mapping (address => uint256[]) public projectsOfASponsor;
+
+  uint256 public currentSponsorId;
 
   ///@notice Function to create a new sponsor for a project
   ///@dev This function is called by Escrow:sponsorProject()

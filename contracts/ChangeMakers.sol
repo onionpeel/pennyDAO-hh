@@ -43,7 +43,7 @@ contract ChangeMakers is Ownable {
 
   /*@notice This is called by the changeMaker only after their registration has been reviewed and ChangeDAO has called authorize() to authorize the changeMaker.*/
   function becomeChangeMaker(
-    string memory name,
+    string memory _name
   )
     public
     authorized
@@ -54,7 +54,7 @@ contract ChangeMakers is Ownable {
 
     ChangeMaker memory newChangeMaker = ChangeMaker(
       msg.sender,
-      name,
+      _name,
       _currentId
     );
     //add changeMaker to mapping
@@ -71,7 +71,7 @@ contract ChangeMakers is Ownable {
   /*@notice ChangeDAO calls this function to give a changeMaker permission to create a ChangeMaker struct*/
   function authorize(address _changeMaker) public onlyOwner {
     isAuthorized[_changeMaker] = true;
-    emit AuthorizedChangeMaker(_changeMaker)
+    emit AuthorizedChangeMaker(_changeMaker);
   }
 
   ///@notice ChangeDAO can check a changeMaker's authorized status

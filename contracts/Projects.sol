@@ -21,16 +21,17 @@ contract Projects is Sponsors {
     bool fullyFunded;
     bool hasMinted;
     bool hasSetSponsorRanks;
-    Sponsor[] sponsors;
   }
 
-  ///@notices References all of the project ids of a particular changeMaker
+  ///@notice References all of the project ids of a particular changeMaker
   mapping (address => uint256[]) changeMakerProjects;
   ///@notice References a Project struct based on its id
-  mapping (uint256 => Project) projectIds;
+  mapping (uint256 => Project) projects;
+  ///@notice Mapping project id to a mapping of sponsor id to a sponsor
+  mapping (uint256 => mapping (uint256 => Sponsor)) sponsors;
 
   Counters.Counter projectCount;
-  uint256 public currentProjectId;
+  // uint256 public currentProjectId;
   ChangeMakers changeMakers;
 
   constructor(ChangeMakers _changeMakers) {
@@ -39,38 +40,58 @@ contract Projects is Sponsors {
 
   ///@notice An authorized changeMaker calls this function to create a new project
   function createProject(
-    string memory name,
-    uint256 expirationTime,
-    uint256 fundingThreshold,
+    string memory _name,
+    uint256 _expirationTime,
+    uint256 _fundingThreshold
   )
     public
   {
-    require(changeMakers.checkAuthorization(msg.sender), 'Not authorized to create a project');
+    require(changeMakers.checkAuthorization(msg.sender), 'Msg.sender not authorized to create a project');
+    //Increment and set project id
     projectCount.increment();
-    uint256 _currentId = projectCount.current();
-    currentProjectId = _currentId;
+    uint256 _currentProjectId = projectCount.current();
+    // currentProjectId = _currentProjectId;
 
-    Project memory newProject = Project(
-      msg.sender,  //changeMaker
-      name,  //name
-      block.timestamp,  //creationTime
-      expirationTime,  //expirationTime
-      _currentId, //id
-      fundingThreshold, //fundingThreshold
-      0, //currentFunding
-      0, //numberOfFunders
-      false, //fullyFunded
-      false, //hasMinted
-      false, //hasSetSponsorRanks
-      Sponsor[] //array of sponsors
-    );
+    //Create a new struct for this project based off of changeMaker's input
+    // Project memory newProject = Project(
+    //   msg.sender,  //changeMaker
+    //   _name,  //name
+    //   block.timestamp,  //creationTime
+    //   _expirationTime,  //expirationTime
+    //   _currentProjectId, //id
+    //   _fundingThreshold, //fundingThreshold
+    //   0, //currentFunding
+    //   0, //numberOfFunders
+    //   false, //fullyFunded
+    //   false, //hasMinted
+    //   false //hasSetSponsorRanks
+    // );
 
-    projectIds[_currentId] = newProject;
-    changeMakerProjects[msg.sender].push(_currentId);
+
+    //Create a new struct for this project based off of changeMaker's input
+    Project memory newProject = Project({
+      changeMaker: msg.sender,
+      name: _name,
+      creationTime: block.timestamp,
+      expirationTime: _expirationTime,
+      id: _currentProjectId,
+      fundingThreshold: _fundingThreshold,
+      currentFunding: 0,
+      numberOfFunders: 0,
+      fullyFunded: false,
+      hasMinted: false,
+      hasSetSponsorRanks: false
+    });
+
+
+    //Set the new project in the projectsIds mapping
+    projects[_currentProjectId] = newProject;
+    //Add the new project's id to the changeMaker's changeMakerProjects array
+    changeMakerProjects[msg.sender].push(_currentProjectId);
   }
 
   ///@notice Return an array of projects belonging to a specific changeMaker
-  function getChangeMakerProjects(address changeMaker) public view returns (Project[] memory){
+  function getChangeMakerProjects(address changeMaker) public view returns (uint256[] memory){
     return changeMakerProjects[changeMaker];
   }
 }

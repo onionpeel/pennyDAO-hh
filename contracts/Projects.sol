@@ -27,8 +27,10 @@ contract Projects is Sponsors {
   mapping (address => uint256[]) changeMakerProjects;
   ///@notice References a Project struct based on its id
   mapping (uint256 => Project) projects;
-  ///@notice Mapping project id to a mapping of sponsor id to a sponsor
-  mapping (uint256 => mapping (uint256 => Sponsor)) sponsors;
+  ///@notice References a project id to all of its sponsor ids
+  mapping (uint256 => uint256[]) projectSponsorIds;
+  ///@notice Sponsor id maps to its sponsor struct
+  mapping (uint256 => Sponsor) sponsors;
 
   Counters.Counter projectCount;
   // uint256 public currentProjectId;

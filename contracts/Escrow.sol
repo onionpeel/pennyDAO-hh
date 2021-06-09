@@ -14,8 +14,7 @@ abstract contract Escrow is Projects, Ownable {
   ///@notice A sponsor funds a particular project
   function fundProject(
     uint256 _projectId,
-    uint256 _amount,
-    uint256 _percentOfProjectFunding
+    uint256 _amount
   )
     public
   {
@@ -23,13 +22,12 @@ abstract contract Escrow is Projects, Ownable {
     Project storage project = projects[_projectId];
 
     require(project.expirationTime > block.timestamp, "Funding period has ended");
-    require(!project.fullyFunded, "Project is already fully funded");
+    require(!project.isFullyFunded, "Project is already fully funded");
 
     project.currentFunding += _amount;
-    project.numberOfFunders++;
 
     if(project.currentFunding >= project.fundingThreshold) {
-      project.fullyFunded = true;
+      project.isFullyFunded = true;
     }
 
     sponsorCount.increment();
@@ -42,9 +40,7 @@ abstract contract Escrow is Projects, Ownable {
       sponsorAddress: msg.sender,
       projectId: _projectId,
       sponsorId: currentSponsorId,
-      fundingAmount: _amount,
-      percentOfProjectFunding: _percentOfProjectFunding,
-      fundingRank: 0
+      fundingAmount: _amount
     });
 
     projectSponsorIds[_projectId].push(currentSponsorId);
@@ -57,6 +53,11 @@ abstract contract Escrow is Projects, Ownable {
   function currentProjectFunding(uint256 _projectId) public view returns (uint256) {
     Project storage project = projects[_projectId];
     return project.currentFunding;
+  }
+
+  function isProjectFullyFunded(uint256 _projectId) public view returns (bool) {
+    Project storage project = projects[_projectId];
+    return project.isFullyFunded;
   }
 
   ///@notice ChangeDao can return funds to sponsors of a specific project in extraordinary circumstances

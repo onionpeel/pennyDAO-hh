@@ -10,8 +10,6 @@ abstract contract Sponsors {
     uint256 projectId;
     uint256 sponsorId;
     uint256 fundingAmount;
-    uint256 percentOfProjectFunding;
-    uint256 fundingRank;
   }
 
   event CreatedSponsor(

@@ -17,10 +17,8 @@ contract Projects is Sponsors {
     uint256 id;
     uint256 fundingThreshold;
     uint256 currentFunding;
-    uint256 numberOfFunders;
-    bool fullyFunded;
+    bool isFullyFunded;
     bool hasMinted;
-    bool hasSetSponsorRanks;
   }
 
   ///@notice References all of the project ids of a particular changeMaker
@@ -64,7 +62,7 @@ contract Projects is Sponsors {
     //   _fundingThreshold, //fundingThreshold
     //   0, //currentFunding
     //   0, //numberOfFunders
-    //   false, //fullyFunded
+    //   false, //isFullyFunded
     //   false, //hasMinted
     //   false //hasSetSponsorRanks
     // );
@@ -79,10 +77,8 @@ contract Projects is Sponsors {
       id: _currentProjectId,
       fundingThreshold: _fundingThreshold,
       currentFunding: 0,
-      numberOfFunders: 0,
-      fullyFunded: false,
-      hasMinted: false,
-      hasSetSponsorRanks: false
+      isFullyFunded: false,
+      hasMinted: false
     });
 
 

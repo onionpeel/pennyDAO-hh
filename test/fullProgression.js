@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 
 describe('Projects.sol', () => {
-  let changeMakers, impactNFT_Generator, projects, deployer, organization1, sponsor1;
+  let changeMakers, impactNFT_Generator, projects, deployer, organization1, sponsor1, sponsor2;
 
   function expiresInOneHour() {
     const currentTimeinMill = Date.now();
@@ -14,6 +14,7 @@ describe('Projects.sol', () => {
     deployer = accounts[0];
     organization1 = accounts[1];
     sponsor1 = accounts[2];
+    sponsor2 = accounts[4];
 
     ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
     changeMakers = await ChangeMakers.deploy();
@@ -65,29 +66,31 @@ describe('Projects.sol', () => {
     expect(XYZprojectArray[2].toNumber()).to.equal(3);
   });
 
-  it('Projects: sponsor1 acquires DAI', async () => {
+  it('sponsor1 acquires DAI', async () => {
     let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
-    // const compoundBalance = await daiContract.balanceOf('0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
-    // console.log('compoundBalance: ', ethers.utils.formatEther(compoundBalance));
-    //impersonate the Compound contract
+    //impersonate externally owned account found on etherscan (this is Binance8)
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: ["0x5d3a536e4d6dbd6114cc1ead35777bab948e3643"]}
+      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
     );
-    let compoundSigner = await ethers.provider.getSigner("0x5d3a536e4d6dbd6114cc1ead35777bab948e3643");
-    compoundSigner.address = compoundSigner._address;
-    let daiContractComp = daiContract.connect(compoundSigner);
-    // console.log(daiContract)
-    // let sponsor1Balance = await daiContract.balanceOf(sponsor1.address);
-    // console.log('sponsor1Balance: ', ethers.utils.formatEther(sponsor1Balance));
+    let eoa = await ethers.provider.getSigner("0xf977814e90da44bfa03b6295a0616a897441acec");
+    let daiContractComp = daiContract.connect(eoa);
+    // transfer dai to sponsor1
+    await daiContractComp.transfer(sponsor1.address, ethers.utils.parseEther('1000000'));
+    let sponsor1Balance = await daiContractComp.balanceOf(sponsor1.address);
+    expect(ethers.utils.formatEther(sponsor1Balance)).to.equal('1000000.0');
+    // transfer dai to sponsor2
+    await daiContractComp.transfer(sponsor2.address, ethers.utils.parseEther('1000000'));
+    let sponsor2Balance = await daiContractComp.balanceOf(sponsor2.address);
+    expect(ethers.utils.formatEther(sponsor2Balance)).to.equal('1000000.0');
 
-    let compoundSignerBalance = await daiContractComp.balanceOf(compoundSigner.address);
-    console.log('compoundSignerBalance: ', ethers.utils.formatEther(compoundSignerBalance));
-    // console.log('daiContractComp signer: ', daiContractComp.signer);
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
+    );
+  });
 
-    let totalSupply = await daiContractComp.totalSupply();
-    console.log('totalSupply: ', ethers.utils.formatEther(totalSupply));
+  it('Projects: sponsor1 funds a project and gets listed as a sponsor', async () => {
 
-    await daiContractComp.transfer(sponsor1.address, ethers.utils.parseEther('1000'));
   });
 });

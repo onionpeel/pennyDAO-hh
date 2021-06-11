@@ -17,6 +17,6 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
 
 7. How to handle the keys of the ChangeDaoTeam and CommunityFund so that if that address needs to change, it can.
 
+8. What type of uint should be used for changeMaker ids?
 
-ChangeMaker.sol
-1. What type of uint should be used for changeMaker ids?
+9. Why does ImpactNFT_Generator need to be abstract?

@@ -34,5 +34,13 @@ require("@nomiclabs/hardhat-waffle");
      },
      paths: {
        artifacts: '../frontend/src/artifacts'
+     },
+     networks: {
+       hardhat: {
+         forking: {
+           url: process.env.ALCHEMY_MAINNET_RPC_URL,
+           blockNumber: 12603000
+         }
+       }
      }
  };

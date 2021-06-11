@@ -2,11 +2,13 @@
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
+import '@openzeppelin/contracts/access/Ownable.sol';
 import './ChangeMakers.sol';
 import './Sponsors.sol';
+import './ImpactNFT_Generator.sol';
 
 ///@title changeMakers create projects
-contract Projects is Sponsors {
+contract Projects is Sponsors, Ownable {
   using Counters for Counters.Counter;
   ///This structure holds the data for a single project created by a changeMaker
   struct Project {
@@ -22,20 +24,21 @@ contract Projects is Sponsors {
   }
 
   ///@notice References all of the project ids of a particular changeMaker
-  mapping (address => uint256[]) changeMakerProjects;
+  mapping (address => uint256[]) public changeMakerProjects;
   ///@notice References a Project struct based on its id
-  mapping (uint256 => Project) projects;
+  mapping (uint256 => Project) public projects;
   ///@notice References a project id to all of its sponsor ids
-  mapping (uint256 => uint256[]) projectSponsorIds;
-  ///@notice Sponsor id maps to its sponsor struct
-  mapping (uint256 => Sponsor) sponsors;
+  mapping (uint256 => uint256[]) public projectSponsorIds;
 
+  Counters.Counter sponsorCount;
   Counters.Counter projectCount;
-  // uint256 public currentProjectId;
-  ChangeMakers changeMakers;
 
-  constructor(ChangeMakers _changeMakers) {
+  ChangeMakers changeMakers;
+  ImpactNFT_Generator impactNFT_Generator;
+
+  constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator) {
     changeMakers = _changeMakers;
+    impactNFT_Generator = _impactNFT_Generator;
   }
 
   ///@notice An authorized changeMaker calls this function to create a new project
@@ -50,23 +53,6 @@ contract Projects is Sponsors {
     //Increment and set project id
     projectCount.increment();
     uint256 _currentProjectId = projectCount.current();
-    // currentProjectId = _currentProjectId;
-
-    //Create a new struct for this project based off of changeMaker's input
-    // Project memory newProject = Project(
-    //   msg.sender,  //changeMaker
-    //   _name,  //name
-    //   block.timestamp,  //creationTime
-    //   _expirationTime,  //expirationTime
-    //   _currentProjectId, //id
-    //   _fundingThreshold, //fundingThreshold
-    //   0, //currentFunding
-    //   0, //numberOfFunders
-    //   false, //isFullyFunded
-    //   false, //hasMinted
-    //   false //hasSetSponsorRanks
-    // );
-
 
     //Create a new struct for this project based off of changeMaker's input
     Project memory newProject = Project({
@@ -81,7 +67,6 @@ contract Projects is Sponsors {
       hasMinted: false
     });
 
-
     //Set the new project in the projectsIds mapping
     projects[_currentProjectId] = newProject;
     //Add the new project's id to the changeMaker's changeMakerProjects array
@@ -91,5 +76,81 @@ contract Projects is Sponsors {
   ///@notice Return an array of projects belonging to a specific changeMaker
   function getChangeMakerProjects(address changeMaker) public view returns (uint256[] memory){
     return changeMakerProjects[changeMaker];
+  }
+
+  ///@notice A user funds a particular project and becomes a sponsor
+  function fundProject(
+    uint256 _projectId,
+    uint256 _amount
+  )
+    public
+  {
+    ///Retrieve the specific project
+    Project storage project = projects[_projectId];
+
+    require(project.expirationTime > block.timestamp, "Funding period has ended");
+    require(!project.isFullyFunded, "Project is already fully funded");
+
+    project.currentFunding += _amount;
+
+    if(project.currentFunding >= project.fundingThreshold) {
+      project.isFullyFunded = true;
+    }
+
+    sponsorCount.increment();
+    currentSponsorId = sponsorCount.current();
+    projectsOfASponsor[msg.sender].push(currentSponsorId);
+
+    ///Create a sponsor struct for the message sender
+    Sponsor memory newSponsor = Sponsor({
+      sponsorAddress: msg.sender,
+      projectId: _projectId,
+      sponsorId: currentSponsorId,
+      fundingAmount: _amount
+    });
+
+    projectSponsorIds[_projectId].push(currentSponsorId);
+    sponsors[currentSponsorId] = newSponsor;
+
+    //TRANSFERFROM(MSG.SENDER, ADDRESS(THIS), _AMOUNT);
+  }
+
+  ///@notice Retrieves the current funding for a specific project
+  function currentProjectFunding(uint256 _projectId) public view returns (uint256) {
+    Project storage project = projects[_projectId];
+    return project.currentFunding;
+  }
+
+  ///@notice Returns bool based on a project's isFullyFunded property
+  function isProjectFullyFunded(uint256 _projectId) public view returns (bool) {
+    Project storage project = projects[_projectId];
+    return project.isFullyFunded;
+  }
+
+  ///@notice ChangeDao can return funds to sponsors of a specific project in extraordinary circumstances
+  function returnFundsToAllSponsors(uint256 _projectId) public onlyOwner {
+    Project storage project = projects[_projectId];
+    require(project.currentFunding > 0, "Project has no funds to return");
+
+    uint256[] storage _projectSponsorIds = projectSponsorIds[_projectId];
+    for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
+      Sponsor storage sponsor = sponsors[i];
+      //dai_contract_address.transfer(sponsor.sponsorAddress, sponsor.fundingAmount);
+    }
+  }
+
+  /*@notice The changeMaker reponsible for a given project calls this function when the project is fully funded*/
+  function createToken(
+    SponsorTokenData[] memory sponsorArray,
+    uint256 _projectId
+  )
+    public
+  {
+    Project storage project = projects[_projectId];
+    require(!project.hasMinted, "NFTs for this project have already been minted");
+    require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    project.hasMinted = true;
+
+    impactNFT_Generator.mintTokens(sponsorArray);
   }
 }

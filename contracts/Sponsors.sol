@@ -2,14 +2,19 @@
 pragma solidity 0.8.4;
 
 ///@title Create and retrieve data about sponsors
-///@dev Project.sol inherits this contract
-abstract contract Sponsors {
-  ///This holds the data about a sponsor
+///@dev Project.sol and ImpactNFT_Generator.sol inherit this contract
+contract Sponsors {
+  ///@notice This holds the data about a sponsor
   struct Sponsor {
     address sponsorAddress;
     uint256 projectId;
     uint256 sponsorId;
     uint256 fundingAmount;
+  }
+  ///@notice An array of this type of struct is passed into createToken() in order to mint the NFTs
+  struct SponsorTokenData {
+    address sponsorAddress;
+    string sponsorTokenURI;
   }
 
   event CreatedSponsor(
@@ -20,18 +25,8 @@ abstract contract Sponsors {
 
   ///@notice Holds an array of the project ids of a specific sponsor
   mapping (address => uint256[]) public projectsOfASponsor;
-
+  ///@notice Sponsor id maps to its sponsor struct
+  mapping (uint256 => Sponsor) sponsors;
+  ///@notice Holds the id value of the most recently created sponsor 
   uint256 public currentSponsorId;
-
-  ///@notice Function to create a new sponsor for a project
-  ///@dev This function is called by Escrow:sponsorProject()
-  function createSponsor() internal {
-
-    //emit CreatedSponsor()
-  }
-
-  ///@notice Frontend can retrieve data about a particular sponsor
-  function getSponsorInformation() public view {
-
-  }
 }

@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 
 describe('Projects.sol', () => {
-  let changeMakers, projects, deployer, organization1, sponsor1;
+  let changeMakers, impactNFT_Generator, projects, deployer, organization1, sponsor1;
 
   function expiresInOneHour() {
     const currentTimeinMill = Date.now();
@@ -18,8 +18,11 @@ describe('Projects.sol', () => {
     ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
     changeMakers = await ChangeMakers.deploy();
 
+    ImpactNFT_Generator = await hre.ethers.getContractFactory('ImpactNFT_Generator');
+    impactNFT_Generator = await ImpactNFT_Generator.deploy('Proof of Impact', 'IMPACT');
+
     Projects = await hre.ethers.getContractFactory('Projects');
-    projects = await Projects.deploy(changeMakers.address);
+    projects = await Projects.deploy(changeMakers.address, impactNFT_Generator.address);
   });
 
   it('ChangeMakers: becomeChangeMaker()', async () => {
@@ -62,7 +65,29 @@ describe('Projects.sol', () => {
     expect(XYZprojectArray[2].toNumber()).to.equal(3);
   });
 
-  it('Escrow: fundProject()', async () => {
-    
+  it('Projects: sponsor1 acquires DAI', async () => {
+    let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
+    // const compoundBalance = await daiContract.balanceOf('0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
+    // console.log('compoundBalance: ', ethers.utils.formatEther(compoundBalance));
+    //impersonate the Compound contract
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: ["0x5d3a536e4d6dbd6114cc1ead35777bab948e3643"]}
+    );
+    let compoundSigner = await ethers.provider.getSigner("0x5d3a536e4d6dbd6114cc1ead35777bab948e3643");
+    compoundSigner.address = compoundSigner._address;
+    let daiContractComp = daiContract.connect(compoundSigner);
+    // console.log(daiContract)
+    // let sponsor1Balance = await daiContract.balanceOf(sponsor1.address);
+    // console.log('sponsor1Balance: ', ethers.utils.formatEther(sponsor1Balance));
+
+    let compoundSignerBalance = await daiContractComp.balanceOf(compoundSigner.address);
+    console.log('compoundSignerBalance: ', ethers.utils.formatEther(compoundSignerBalance));
+    // console.log('daiContractComp signer: ', daiContractComp.signer);
+
+    let totalSupply = await daiContractComp.totalSupply();
+    console.log('totalSupply: ', ethers.utils.formatEther(totalSupply));
+
+    await daiContractComp.transfer(sponsor1.address, ethers.utils.parseEther('1000'));
   });
 });

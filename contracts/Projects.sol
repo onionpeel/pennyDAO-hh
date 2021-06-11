@@ -73,11 +73,6 @@ contract Projects is Sponsors, Ownable {
     changeMakerProjects[msg.sender].push(_currentProjectId);
   }
 
-  ///@notice Return an array of projects belonging to a specific changeMaker
-  function getChangeMakerProjects(address changeMaker) public view returns (uint256[] memory){
-    return changeMakerProjects[changeMaker];
-  }
-
   ///@notice A user funds a particular project and becomes a sponsor
   function fundProject(
     uint256 _projectId,
@@ -99,7 +94,7 @@ contract Projects is Sponsors, Ownable {
 
     sponsorCount.increment();
     currentSponsorId = sponsorCount.current();
-    projectsOfASponsor[msg.sender].push(currentSponsorId);
+    projectsOfASponsor[msg.sender].push(_projectId);
 
     ///Create a sponsor struct for the message sender
     Sponsor memory newSponsor = Sponsor({
@@ -127,6 +122,16 @@ contract Projects is Sponsors, Ownable {
     return project.isFullyFunded;
   }
 
+  /*@notice Returns an array of projects from the changeMakerProjects mapping belonging to a specific changeMaker*/
+  function getChangeMakerProjects(address _changeMaker) public view returns (uint256[] memory){
+    return changeMakerProjects[_changeMaker];
+  }
+
+  ///@notice Returns an array from the projectsSponsorIds mapping
+  function getProjectSponsorIds(uint256 _projectId) public view returns (uint256[] memory) {
+    return projectSponsorIds[_projectId];
+  }
+
   ///@notice ChangeDao can return funds to sponsors of a specific project in extraordinary circumstances
   function returnFundsToAllSponsors(uint256 _projectId) public onlyOwner {
     Project storage project = projects[_projectId];
@@ -137,11 +142,6 @@ contract Projects is Sponsors, Ownable {
       Sponsor storage sponsor = sponsors[i];
       //dai_contract_address.transfer(sponsor.sponsorAddress, sponsor.fundingAmount);
     }
-  }
-
-  ///@notice Returns an array from the projectsSponsorIds mapping 
-  function getProjectSponsorIds(uint256 _projectId) public view returns (uint256[] memory) {
-    return projectSponsorIds[_projectId];
   }
 
   /*@notice The changeMaker reponsible for a given project calls this function when the project is fully funded*/

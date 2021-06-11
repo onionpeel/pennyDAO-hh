@@ -27,6 +27,11 @@ contract Sponsors {
   mapping (address => uint256[]) public projectsOfASponsor;
   ///@notice Sponsor id maps to its sponsor struct
   mapping (uint256 => Sponsor) sponsors;
-  ///@notice Holds the id value of the most recently created sponsor 
+  ///@notice Holds the id value of the most recently created sponsor
   uint256 public currentSponsorId;
+
+  ///@notice Returns an array from the projectsOfASponsor mapping 
+  function getProjectsOfASponsor(address _sponsor) public view returns (uint256[] memory) {
+    return projectsOfASponsor[_sponsor];
+  }
 }

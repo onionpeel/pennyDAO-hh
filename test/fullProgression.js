@@ -97,16 +97,40 @@ describe('Projects.sol', () => {
     let currentProjectFunding = await projectsSponsor1.currentProjectFunding(ethers.BigNumber.from(2));
     expect(currentProjectFunding.toNumber()).to.equal(700);
 
-    projectsSponsor2 = projects.connect(sponsor2);
-    tx = await projectsSponsor2.fundProject(ethers.BigNumber.from(2), ethers.BigNumber.from(300));
+    let isFullyFunded = await projectsSponsor1.isProjectFullyFunded(ethers.BigNumber.from(2));
+    expect(isFullyFunded).to.equal(false);
+  });
 
-    currentProjectFunding = await projectsSponsor2.currentProjectFunding(ethers.BigNumber.from(2));
+  it('Projects: sponsor2 funds project, gets listed; project is fully funded', async () => {
+    projectsSponsor2 = projects.connect(sponsor2);
+    let tx = await projectsSponsor2.fundProject(ethers.BigNumber.from(2), ethers.BigNumber.from(300));
+
+    let currentProjectFunding = await projectsSponsor2.currentProjectFunding(ethers.BigNumber.from(2));
     expect(currentProjectFunding.toNumber()).to.equal(1000);
 
-    let sponsorIds = await projects.getProjectSponsorIds(ethers.BigNumber.from(2));
-    console.log(sponsorIds.toString());
-
-    // let projectStruct = await projects.projects(2);
-    // console.log(projectStruct)
+    let isFullyFunded = await projectsSponsor2.isProjectFullyFunded(ethers.BigNumber.from(2));
+    expect(isFullyFunded).to.equal(true);
   });
+
+  it('Projects: sponsor1 and sponsor2 are listed as sponsors', async () => {
+    let sponsorIds = await projects.getProjectSponsorIds(ethers.BigNumber.from(2));
+    expect(sponsorIds[0].toNumber()).to.equal(1);
+    expect(sponsorIds[1].toNumber()).to.equal(2);
+  });
+
+  it('Projects: organization1 has three project ids assigned to it', async () => {
+    let organization1ProjectIds = await projects.getChangeMakerProjects(organization1.address);
+    expect(organization1ProjectIds[0].toNumber()).to.equal(1);
+    expect(organization1ProjectIds[1].toNumber()).to.equal(2);
+    expect(organization1ProjectIds[2].toNumber()).to.equal(3);
+  });
+
+  it('Sponsors: sponsor1 and sponsor2 have project 2 in their list of sponsored projects', async () => {
+    let sponsor1ProjectIds = await projects.getProjectsOfASponsor(sponsor1.address);
+    let sponsor2ProjectIds = await projects.getProjectsOfASponsor(sponsor2.address);
+    expect(sponsor1ProjectIds[0].toNumber()).to.equal(2);
+    expect(sponsor1ProjectIds[0].toNumber()).to.equal(2);
+  });
+
+  
 });

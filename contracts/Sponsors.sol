@@ -11,7 +11,7 @@ contract Sponsors {
     uint256 sponsorId;
     uint256 fundingAmount;
   }
-  ///@notice An array of this type of struct is passed into createToken() in order to mint the NFTs
+  ///@notice An array of this type of struct is passed into createTokens() in order to mint the NFTs
   struct SponsorTokenData {
     address sponsorAddress;
     string sponsorTokenURI;
@@ -30,7 +30,7 @@ contract Sponsors {
   ///@notice Holds the id value of the most recently created sponsor
   uint256 public currentSponsorId;
 
-  ///@notice Returns an array from the projectsOfASponsor mapping 
+  ///@notice Returns an array from the projectsOfASponsor mapping
   function getProjectsOfASponsor(address _sponsor) public view returns (uint256[] memory) {
     return projectsOfASponsor[_sponsor];
   }

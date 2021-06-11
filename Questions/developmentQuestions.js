@@ -20,3 +20,5 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
 8. What type of uint should be used for changeMaker ids?
 
 9. Why does ImpactNFT_Generator need to be abstract?
+
+10. How to handle decimals/exponents in dealing with funding threshold and dai amounts?

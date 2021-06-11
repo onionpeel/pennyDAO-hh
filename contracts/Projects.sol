@@ -145,17 +145,27 @@ contract Projects is Sponsors, Ownable {
   }
 
   /*@notice The changeMaker reponsible for a given project calls this function when the project is fully funded*/
-  function createToken(
+  function createTokens(
     SponsorTokenData[] memory sponsorArray,
     uint256 _projectId
   )
     public
   {
+    ///check that only the changeMaker responsible for this specific project is calling this function
+    bool isMsgSenderProjectOwner;
+    uint256[] memory msgSenderProjectsArray = changeMakerProjects[msg.sender];
+    for(uint256 i = 0; i < msgSenderProjectsArray.length; i++) {
+      if(msgSenderProjectsArray[i] == _projectId) {
+        isMsgSenderProjectOwner = true;
+      }
+    }
+    require(isMsgSenderProjectOwner, "Only the authorized changeMaker can call createTokens()");
+    ///security checks for the project; prevent re-minting by setting hasMinted to true
     Project storage project = projects[_projectId];
     require(!project.hasMinted, "NFTs for this project have already been minted");
     require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
     project.hasMinted = true;
-
+    ///mint the NFT
     impactNFT_Generator.mintTokens(sponsorArray);
   }
 }

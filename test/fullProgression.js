@@ -1,7 +1,9 @@
 const { expect } = require('chai');
 
 describe('Projects.sol', () => {
-  let changeMakers, impactNFT_Generator, projects, deployer, organization1, sponsor1, sponsor2;
+  let changeMakers, impactNFT_Generator, projects; //contract instances
+  let deployer, organization1, sponsor1, sponsor2; //externally owned accounts
+  let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
 
   function expiresInOneHour() {
     const currentTimeinMill = Date.now();
@@ -9,21 +11,34 @@ describe('Projects.sol', () => {
     return currentTimeinSeconds + 3600;
   };
 
-  it('deploys ChangeMakers and Projects contracts; assigns signers', async () => {
-    const accounts = await hre.ethers.getSigners();
-    deployer = accounts[0];
-    organization1 = accounts[1];
-    sponsor1 = accounts[2];
-    sponsor2 = accounts[4];
+  it(
+    'deploys ChangeMakers and Projects contracts; assigns signers, sets arrayOfDataForMintingNFTs',
+    async () => {
+      const accounts = await hre.ethers.getSigners();
+      deployer = accounts[0];
+      organization1 = accounts[1];
+      sponsor1 = accounts[2];
+      sponsor2 = accounts[4];
 
-    ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
-    changeMakers = await ChangeMakers.deploy();
+      arrayOfDataForMintingNFTs = [
+        {
+          sponsorAddress: sponsor1.address,
+          sponsorTokenURI: "This is the URI for sponsor1's NFT"
+        },
+        {
+          sponsorAddress: sponsor2.address,
+          sponsorTokenURI: "This is the URI for sponsor2's NFT"
+        }
+      ];
 
-    ImpactNFT_Generator = await hre.ethers.getContractFactory('ImpactNFT_Generator');
-    impactNFT_Generator = await ImpactNFT_Generator.deploy('Proof of Impact', 'IMPACT');
+      ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
+      changeMakers = await ChangeMakers.deploy();
 
-    Projects = await hre.ethers.getContractFactory('Projects');
-    projects = await Projects.deploy(changeMakers.address, impactNFT_Generator.address);
+      ImpactNFT_Generator = await hre.ethers.getContractFactory('ImpactNFT_Generator');
+      impactNFT_Generator = await ImpactNFT_Generator.deploy('Proof of Impact', 'IMPACT');
+
+      Projects = await hre.ethers.getContractFactory('Projects');
+      projects = await Projects.deploy(changeMakers.address, impactNFT_Generator.address);
   });
 
   it('ChangeMakers: becomeChangeMaker()', async () => {
@@ -132,5 +147,11 @@ describe('Projects.sol', () => {
     expect(sponsor1ProjectIds[0].toNumber()).to.equal(2);
   });
 
-  
+  it('Projects: deployer attempts to call createTokens but fails because not authorized', async () =>{
+    let organization1Project = projects.connect(organization1);
+    let attemptedCall = await organization1Project.createTokens(arrayOfDataForMintingNFTs, ethers.BigNumber.from(2));
+
+    // let attemptedCall = await projects.createTokens(arrayOfDataForMintingNFTs, ethers.BigNumber.from(2));
+    console.log(attemptedCall)
+  });
 });

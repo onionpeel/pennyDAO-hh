@@ -12,7 +12,7 @@ contract ImpactNFT_Generator is ERC721URIStorage, Sponsors {
 
   constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
 
-  ///@notice This function is called by Project: createToken() and it mints all the NFTs for a project
+  ///@notice This function is called by Project: createTokens() and it mints all the NFTs for a project
   function mintTokens(SponsorTokenData[] memory sponsorArray) public {
      uint256 current;
       for(uint256 i; i < sponsorArray.length; i++) {

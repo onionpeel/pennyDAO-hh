@@ -139,6 +139,11 @@ contract Projects is Sponsors, Ownable {
     }
   }
 
+  ///@notice Returns an array from the projectsSponsorIds mapping 
+  function getProjectSponsorIds(uint256 _projectId) public view returns (uint256[] memory) {
+    return projectSponsorIds[_projectId];
+  }
+
   /*@notice The changeMaker reponsible for a given project calls this function when the project is fully funded*/
   function createToken(
     SponsorTokenData[] memory sponsorArray,

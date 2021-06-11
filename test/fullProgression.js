@@ -57,7 +57,7 @@ describe('Projects.sol', () => {
     await projects.connect(organization1).createProject(
       "XYZ third project",
       ethers.BigNumber.from(expirationTime),
-      ethers.BigNumber.from(1000) //fundingThreshold
+      ethers.BigNumber.from(1000) //fundingThreshold (amount x 10e18)
     );
     //Return an array of all the project ids for the projects organization1 has created
     const XYZprojectArray = await projects.connect(deployer).getChangeMakerProjects(organization1.address);
@@ -91,6 +91,22 @@ describe('Projects.sol', () => {
   });
 
   it('Projects: sponsor1 funds a project and gets listed as a sponsor', async () => {
+    projectsSponsor1 = projects.connect(sponsor1);
+    let tx = await projectsSponsor1.fundProject(ethers.BigNumber.from(2), ethers.BigNumber.from(700));
 
+    let currentProjectFunding = await projectsSponsor1.currentProjectFunding(ethers.BigNumber.from(2));
+    expect(currentProjectFunding.toNumber()).to.equal(700);
+
+    projectsSponsor2 = projects.connect(sponsor2);
+    tx = await projectsSponsor2.fundProject(ethers.BigNumber.from(2), ethers.BigNumber.from(300));
+
+    currentProjectFunding = await projectsSponsor2.currentProjectFunding(ethers.BigNumber.from(2));
+    expect(currentProjectFunding.toNumber()).to.equal(1000);
+
+    let sponsorIds = await projects.getProjectSponsorIds(ethers.BigNumber.from(2));
+    console.log(sponsorIds.toString());
+
+    // let projectStruct = await projects.projects(2);
+    // console.log(projectStruct)
   });
 });

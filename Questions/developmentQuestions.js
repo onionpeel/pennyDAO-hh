@@ -22,3 +22,7 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
 9. Why does ImpactNFT_Generator need to be abstract?
 
 10. How to handle decimals/exponents in dealing with funding threshold and dai amounts?
+
+11. what is supportsInterface?
+
+12.  The _mint() function in ImpactNFT_Generator.sol is called within Projects:createTokens().  Can _mint() be accessed externally even though createTokens() has security checks to limit it to just the changeMaker that craeted the project?  ImpactNFT_Generator.sol is created inside of Projects.sol, so does this prevent the address of ImpactNFT_Generator.sol from being used to call _mint directly?

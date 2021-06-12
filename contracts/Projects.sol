@@ -35,10 +35,12 @@ contract Projects is Sponsors, Ownable {
 
   ChangeMakers changeMakers;
   ImpactNFT_Generator impactNFT_Generator;
+  Dai dai;
 
-  constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator) {
+  constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator, address daiAddress) {
     changeMakers = _changeMakers;
     impactNFT_Generator = _impactNFT_Generator;
+    dai = Dai(daiAddress);
   }
 
   ///@notice An authorized changeMaker calls this function to create a new project
@@ -74,6 +76,7 @@ contract Projects is Sponsors, Ownable {
   }
 
   ///@notice A user funds a particular project and becomes a sponsor
+  /*@dev The sponsor must give the Projects.sol contract approval to use dai.transferFrom() before calling this function by using dai.approve()*/
   function fundProject(
     uint256 _projectId,
     uint256 _amount
@@ -107,7 +110,7 @@ contract Projects is Sponsors, Ownable {
     projectSponsorIds[_projectId].push(currentSponsorId);
     sponsors[currentSponsorId] = newSponsor;
 
-    //TRANSFERFROM(MSG.SENDER, ADDRESS(THIS), _AMOUNT);
+    dai.transferFrom(msg.sender, address(this), _amount);
   }
 
   ///@notice Retrieves the current funding for a specific project
@@ -168,4 +171,10 @@ contract Projects is Sponsors, Ownable {
     ///mint the NFT
     impactNFT_Generator.mintTokens(sponsorArray);
   }
+}
+
+interface Dai {
+    function transfer(address dst, uint wad) external returns (bool);
+    function transferFrom( address sender, address recipient, uint256 amount) external returns (bool);
+    function balanceOf(address guy) external view returns (uint);
 }

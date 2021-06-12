@@ -139,41 +139,4 @@ describe('Projects.sol', () => {
     let isFullyFunded = await projectsSponsor2.isProjectFullyFunded(ethers.BigNumber.from(2));
     expect(isFullyFunded).to.equal(true);
   });
-
-  it('Projects: sponsor1 and sponsor2 are listed as sponsors', async () => {
-    let sponsorIds = await projects.getProjectSponsorIds(ethers.BigNumber.from(2));
-    expect(sponsorIds[0].toNumber()).to.equal(1);
-    expect(sponsorIds[1].toNumber()).to.equal(2);
-  });
-
-  it('Projects: organization1 has three project ids assigned to it', async () => {
-    let organization1ProjectIds = await projects.getChangeMakerProjects(organization1.address);
-    expect(organization1ProjectIds[0].toNumber()).to.equal(1);
-    expect(organization1ProjectIds[1].toNumber()).to.equal(2);
-    expect(organization1ProjectIds[2].toNumber()).to.equal(3);
-  });
-
-  it('Sponsors: sponsor1 and sponsor2 have project 2 in their list of sponsored projects', async () => {
-    let sponsor1ProjectIds = await projects.getProjectsOfASponsor(sponsor1.address);
-    let sponsor2ProjectIds = await projects.getProjectsOfASponsor(sponsor2.address);
-    expect(sponsor1ProjectIds[0].toNumber()).to.equal(2);
-    expect(sponsor1ProjectIds[0].toNumber()).to.equal(2);
-  });
-
-  it('Projects: deployer attempts to call createTokens but fails because not authorized', async () =>{
-    expect(projects.createTokens(arrayOfDataForMintingNFTs, ethers.BigNumber.from(2))).to.be.revertedWith("Only the authorized changeMaker can call createTokens()");
-  });
-
-  it('Projects: authorized changeMaker successfully calls createTokens()', async () => {
-    let organization1Project = projects.connect(organization1);
-    let successfulCall = await organization1Project.createTokens(
-      arrayOfDataForMintingNFTs,
-      ethers.BigNumber.from(2)
-    );
-
-    let ownerNFT1 = await impactNFT_Generator.ownerOf(ethers.BigNumber.from(1));
-    expect(ownerNFT1).to.equal(sponsor1.address);
-    let ownerNFT2 = await impactNFT_Generator.ownerOf(ethers.BigNumber.from(2));
-    expect(ownerNFT2).to.equal(sponsor2.address);
-  });
 });

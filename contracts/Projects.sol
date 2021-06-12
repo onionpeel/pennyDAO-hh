@@ -140,10 +140,10 @@ contract Projects is Sponsors, Ownable {
     Project storage project = projects[_projectId];
     require(project.currentFunding > 0, "Project has no funds to return");
 
-    uint256[] storage _projectSponsorIds = projectSponsorIds[_projectId];
+    uint256[] memory _projectSponsorIds = projectSponsorIds[_projectId];
     for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
-      Sponsor storage sponsor = sponsors[i];
-      //dai_contract_address.transfer(sponsor.sponsorAddress, sponsor.fundingAmount);
+      Sponsor memory sponsor = sponsors[i + 1];
+      dai.transfer(sponsor.sponsorAddress, sponsor.fundingAmount);
     }
   }
 

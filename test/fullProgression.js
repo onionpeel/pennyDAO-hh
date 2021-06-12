@@ -2,7 +2,7 @@ const { expect } = require('chai');
 
 describe('Projects.sol', () => {
   let changeMakers, impactNFT_Generator, projects; //contract instances
-  let deployer, organization1, sponsor1, sponsor2; //externally owned accounts
+  let changeDAO, organization1, sponsor1, sponsor2; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
 
   function expiresInOneHour() {
@@ -15,7 +15,7 @@ describe('Projects.sol', () => {
     'deploys ChangeMakers and Projects contracts; assigns signers, sets arrayOfDataForMintingNFTs',
     async () => {
       const accounts = await hre.ethers.getSigners();
-      deployer = accounts[0];
+      changeDAO = accounts[0];
       organization1 = accounts[1];
       sponsor1 = accounts[2];
       sponsor2 = accounts[4];
@@ -43,7 +43,7 @@ describe('Projects.sol', () => {
   });
 
   it('ChangeMakers: becomeChangeMaker()', async () => {
-    //ChangeDao authorizes organization1.address to become a changeMaker
+    //ChangeDAO authorizes organization1.address to become a changeMaker
     await changeMakers.authorize(organization1.address);
     //Check the authorization status of organization1
     const isUser1Authorized = await changeMakers.checkAuthorization(organization1.address);
@@ -59,9 +59,9 @@ describe('Projects.sol', () => {
     //organization1 creates three new projects
     expirationTime = expiresInOneHour();
     await projects.connect(organization1).createProject(
-      "XYX first project",
-      ethers.BigNumber.from(expirationTime),
-      ethers.utils.parseEther('1000')
+      "XYX first project", //name of project
+      ethers.BigNumber.from(expirationTime), //time in seconds before expiration
+      ethers.utils.parseEther('1000') //funding amount (1000*10e18);
     );
     expirationTime = expiresInOneHour();
     await projects.connect(organization1).createProject(
@@ -76,7 +76,7 @@ describe('Projects.sol', () => {
       ethers.utils.parseEther('1000')
     );
     //Return an array of all the project ids for the projects organization1 has created
-    const XYZprojectArray = await projects.connect(deployer).getChangeMakerProjects(organization1.address);
+    const XYZprojectArray = await projects.connect(changeDAO).getChangeMakerProjects(organization1.address);
     expect(XYZprojectArray[0].toNumber()).to.equal(1);
     expect(XYZprojectArray[1].toNumber()).to.equal(2);
     expect(XYZprojectArray[2].toNumber()).to.equal(3);
@@ -129,7 +129,7 @@ describe('Projects.sol', () => {
 
     projectsSponsor2 = projects.connect(sponsor2);
     daiContractSponsor2 = daiContract.connect(sponsor2);
-    //sponsor1 give approval for the projects instance to transferFrom() the approved amount
+    //sponsor1 gives approval for the projects instance to transferFrom() the approved amount
     await daiContractSponsor2.approve(projects.address, amount);
     await projectsSponsor2.fundProject(ethers.BigNumber.from(2), amount);
 
@@ -160,7 +160,7 @@ describe('Projects.sol', () => {
     expect(sponsor1ProjectIds[0].toNumber()).to.equal(2);
   });
 
-  it('Projects: deployer attempts to call createTokens but fails because not authorized', async () =>{
+  it('Projects: ChangeDAO attempts to call createTokens but fails because not authorized', async () =>{
     expect(projects.createTokens(arrayOfDataForMintingNFTs, ethers.BigNumber.from(2))).to.be.revertedWith("Only the authorized changeMaker can call createTokens()");
   });
 

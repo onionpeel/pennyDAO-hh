@@ -26,3 +26,5 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
 11. what is supportsInterface?
 
 12.  The _mint() function in ImpactNFT_Generator.sol is called within Projects:createTokens().  Can _mint() be accessed externally even though createTokens() has security checks to limit it to just the changeMaker that craeted the project?  ImpactNFT_Generator.sol is created inside of Projects.sol, so does this prevent the address of ImpactNFT_Generator.sol from being used to call _mint directly?
+
+13.  projectSponsorIds will be a problem as more sponsors get listed because it keeps track of all sponsors in this mapping.  The sponsors need to be enumerated per project so the numbers do not grow to large.  The problem arises in the event of a refund, in which all the sponsor ids must be looped over to check if they are in the array of sponsors for a given project.

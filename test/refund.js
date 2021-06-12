@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 
-describe('Projects.sol', () => {
+xdescribe('Projects.sol', () => {
   let changeMakers, impactNFT_Generator, projects; //contract instances
-  let deployer, organization1, sponsor1, sponsor2; //externally owned accounts
+  let changeDAO, organization1, sponsor1, sponsor2; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
 
   function expiresInOneHour() {
@@ -15,7 +15,7 @@ describe('Projects.sol', () => {
     'deploys ChangeMakers and Projects contracts; assigns signers, sets arrayOfDataForMintingNFTs',
     async () => {
       const accounts = await hre.ethers.getSigners();
-      deployer = accounts[0];
+      changeDAO = accounts[0];
       organization1 = accounts[1];
       sponsor1 = accounts[2];
       sponsor2 = accounts[4];
@@ -76,7 +76,7 @@ describe('Projects.sol', () => {
       ethers.utils.parseEther('1000')
     );
     //Return an array of all the project ids for the projects organization1 has created
-    const XYZprojectArray = await projects.connect(deployer).getChangeMakerProjects(organization1.address);
+    const XYZprojectArray = await projects.connect(changeDAO).getChangeMakerProjects(organization1.address);
     expect(XYZprojectArray[0].toNumber()).to.equal(1);
     expect(XYZprojectArray[1].toNumber()).to.equal(2);
     expect(XYZprojectArray[2].toNumber()).to.equal(3);
@@ -123,8 +123,8 @@ describe('Projects.sol', () => {
     expect(isFullyFunded).to.equal(false);
   });
 
-  it('Projects: sponsor2 funds project, gets listed; project is fully funded', async () => {
-    let amount = ethers.utils.parseEther('300');
+  it('Projects: sponsor2 funds project, gets listed; project is NOT fully funded', async () => {
+    let amount = ethers.utils.parseEther('200');
     let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
 
     projectsSponsor2 = projects.connect(sponsor2);
@@ -134,9 +134,28 @@ describe('Projects.sol', () => {
     await projectsSponsor2.fundProject(ethers.BigNumber.from(2), amount);
 
     let currentProjectFunding = await projectsSponsor2.currentProjectFunding(ethers.BigNumber.from(2));
-    expect(ethers.utils.formatEther(currentProjectFunding)).to.equal('1000.0');
+    expect(ethers.utils.formatEther(currentProjectFunding)).to.equal('900.0');
 
     let isFullyFunded = await projectsSponsor2.isProjectFullyFunded(ethers.BigNumber.from(2));
-    expect(isFullyFunded).to.equal(true);
+    expect(isFullyFunded).to.equal(false);
+  });
+
+  it('Projects: ChangeDAO calls returnFundsToAllSponsors()', async () => {
+    const daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
+    //sponsor1 balance before refund
+    let sponsor1Balance = await daiContract.balanceOf(sponsor1.address);
+    expect(ethers.utils.formatEther(sponsor1Balance)).to.equal('999300.0');
+    //sponsor2 balance before refund
+    let sponsor2Balance = await daiContract.balanceOf(sponsor2.address);
+    expect(ethers.utils.formatEther(sponsor2Balance)).to.equal('999800.0');
+
+    await projects.returnFundsToAllSponsors(ethers.BigNumber.from('2'));
+
+    //sponsor1 balance after refund
+    sponsor1Balance = await daiContract.balanceOf(sponsor1.address);
+    expect(ethers.utils.formatEther(sponsor1Balance)).to.equal('1000000.0');
+    // //sponsor2 balance after refund
+    sponsor2Balance = await daiContract.balanceOf(sponsor2.address);
+    expect(ethers.utils.formatEther(sponsor2Balance)).to.equal('1000000.0');
   });
 });

@@ -4,6 +4,7 @@ describe('Projects.sol', () => {
   let changeMakers, impactNFT_Generator, projects; //contract instances
   let changeDAO, organization1, sponsor1, sponsor2; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
+  let daiContract;
 
   function expiresInOneHour() {
     const currentTimeinMill = Date.now();
@@ -11,26 +12,28 @@ describe('Projects.sol', () => {
     return currentTimeinSeconds + 3600;
   };
 
-  it(
-    'deploys ChangeMakers and Projects contracts; assigns signers, sets arrayOfDataForMintingNFTs',
-    async () => {
-      const accounts = await hre.ethers.getSigners();
-      changeDAO = accounts[0];
-      organization1 = accounts[1];
-      sponsor1 = accounts[2];
-      sponsor2 = accounts[4];
+  it('Assigns signers', async () => {
+    const accounts = await hre.ethers.getSigners();
+    changeDAO = accounts[0];
+    organization1 = accounts[1];
+    sponsor1 = accounts[2];
+    sponsor2 = accounts[4];
+  });
 
-      arrayOfDataForMintingNFTs = [
-        {
-          sponsorAddress: sponsor1.address,
-          sponsorTokenURI: "This is the URI for sponsor1's NFT"
-        },
-        {
-          sponsorAddress: sponsor2.address,
-          sponsorTokenURI: "This is the URI for sponsor2's NFT"
-        }
-      ];
+  it('Sets arrayOfDataForMintingNFTs', async () => {
+    arrayOfDataForMintingNFTs = [
+      {
+        sponsorAddress: sponsor1.address,
+        sponsorTokenURI: "This is the URI for sponsor1's NFT"
+      },
+      {
+        sponsorAddress: sponsor2.address,
+        sponsorTokenURI: "This is the URI for sponsor2's NFT"
+      }
+    ];
+  });
 
+  it('Deploys ChangeMakers, ImpactNFT_Generator, Projects contracts', async () => {
       ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
       changeMakers = await ChangeMakers.deploy();
 
@@ -40,6 +43,8 @@ describe('Projects.sol', () => {
       const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
       Projects = await hre.ethers.getContractFactory('Projects');
       projects = await Projects.deploy(changeMakers.address, impactNFT_Generator.address, daiAddress);
+
+      daiContract = await ethers.getContractAt('IERC20', daiAddress);
   });
 
   it('ChangeMakers: becomeChangeMaker()', async () => {
@@ -83,7 +88,6 @@ describe('Projects.sol', () => {
   });
 
   it('sponsor1 acquires DAI', async () => {
-    let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
     //impersonate externally owned account found on etherscan (this is Binance8)
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -107,19 +111,7 @@ describe('Projects.sol', () => {
   });
 
   it('Projects: sponsor1 funds a project and gets listed as a sponsor', async () => {
-    let fullAmount = '700';
-
-    let onePercent = ethers.utils.parseEther('700').div(100);
-    let ninetyEightPercent = ethers.utils.parseEther(fullAmount).sub(onePercent).sub(onePercent);
-    console.log(ethers.utils.parseEther(fullAmount).toString());
-    console.log(onePercent.toString());
-    console.log(ninetyEightPercent.toString());
-    expect(ethers.utils.formatEther(ninetyEightPercent.add(onePercent).add(onePercent))).to.equal('700.0');
-    console.log(ethers.utils.formatEther(ninetyEightPercent.add(onePercent).add(onePercent)));
-
     let amount = ethers.utils.parseEther('700');
-
-    let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
 
     projectsSponsor1 = projects.connect(sponsor1);
     daiContractSponsor1 = daiContract.connect(sponsor1);
@@ -136,7 +128,6 @@ describe('Projects.sol', () => {
 
   it('Projects: sponsor2 funds project, gets listed; project is fully funded', async () => {
     let amount = ethers.utils.parseEther('300');
-    let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
 
     projectsSponsor2 = projects.connect(sponsor2);
     daiContractSponsor2 = daiContract.connect(sponsor2);
@@ -186,5 +177,13 @@ describe('Projects.sol', () => {
     expect(ownerNFT1).to.equal(sponsor1.address);
     let ownerNFT2 = await impactNFT_Generator.ownerOf(ethers.BigNumber.from(2));
     expect(ownerNFT2).to.equal(sponsor2.address);
+  });
+
+  it('Projects: changeMaker calls withdrawNinetyEightPercent() and gets 98% of total funding', async () => {
+    let organization1Project = projects.connect(organization1);
+    ///changeMaker calls function to receive 98% of project funding
+    await organization1Project.withdrawNinetyEightPercent(ethers.BigNumber.from('2'));
+    let organization1Balance = await daiContract.balanceOf(organization1.address);
+    expect(ethers.utils.formatEther(organization1Balance)).to.equal('980.0');
   });
 });

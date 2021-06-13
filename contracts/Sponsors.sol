@@ -9,7 +9,7 @@ contract Sponsors {
     address sponsorAddress;
     uint256 projectId;
     uint256 sponsorId;
-    uint256 fundingAmount;
+    uint256 sponsorFundingAmount;
   }
   ///@notice An array of this type of struct is passed into createTokens() in order to mint the NFTs
   struct SponsorTokenData {
@@ -20,7 +20,7 @@ contract Sponsors {
   event CreatedSponsor(
     address sponsorAddress,
     uint256 projectId,
-    uint256 fundingAmount
+    uint256 sponsorFundingAmount
   );
 
   ///@notice Holds an array of the project ids of a specific sponsor

@@ -19,8 +19,10 @@ contract Projects is Sponsors, Ownable {
     uint256 id;
     uint256 fundingThreshold;
     uint256 currentFunding;
+    uint256 ninetyEightPercentFunding;
     bool isFullyFunded;
     bool hasMinted;
+    bool hasWithdrawnNinetyEightPercent;
   }
 
   ///@notice References all of the project ids of a particular changeMaker
@@ -65,8 +67,10 @@ contract Projects is Sponsors, Ownable {
       id: _currentProjectId,
       fundingThreshold: _fundingThreshold,
       currentFunding: 0,
+      ninetyEightPercentFunding: 0,
       isFullyFunded: false,
-      hasMinted: false
+      hasMinted: false,
+      hasWithdrawnNinetyEightPercent: false
     });
 
     //Set the new project in the projectsIds mapping
@@ -104,14 +108,14 @@ contract Projects is Sponsors, Ownable {
       sponsorAddress: msg.sender,
       projectId: _projectId,
       sponsorId: currentSponsorId,
-      fundingAmount: _amount
+      sponsorFundingAmount: _amount
     });
     ///The sponsor information gets stored
     projectSponsorIds[_projectId].push(currentSponsorId);
     sponsors[currentSponsorId] = newSponsor;
     ///The sponsor's dai get transferred to this contract
     dai.transferFrom(msg.sender, address(this), _amount);
-    
+
   }
 
   ///@notice Retrieves the current funding for a specific project
@@ -144,7 +148,7 @@ contract Projects is Sponsors, Ownable {
     uint256[] memory _projectSponsorIds = projectSponsorIds[_projectId];
     for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
       Sponsor memory sponsor = sponsors[i + 1];
-      dai.transfer(sponsor.sponsorAddress, sponsor.fundingAmount);
+      dai.transfer(sponsor.sponsorAddress, sponsor.sponsorFundingAmount);
     }
   }
 
@@ -172,7 +176,33 @@ contract Projects is Sponsors, Ownable {
     ///mint the NFT
     impactNFT_Generator.mintTokens(sponsorArray);
   }
+
+  function withdrawNinetyEightPercent(uint256 _projectId) public {
+    ///Security check
+    Project storage project = projects[_projectId];
+    require(project.hasMinted, "NFTs for this project have already been minted");
+    require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    require(!project.hasWithdrawnNinetyEightPercent, "The 98% of project funding has already been withdrawn");
+
+    ///check that only the changeMaker responsible for this specific project is calling this function
+    bool isMsgSenderProjectOwner;
+    uint256[] memory msgSenderProjectsArray = changeMakerProjects[msg.sender];
+    for(uint256 i = 0; i < msgSenderProjectsArray.length; i++) {
+      if(msgSenderProjectsArray[i] == _projectId) {
+        isMsgSenderProjectOwner = true;
+      }
+    }
+    require(isMsgSenderProjectOwner, "Only the authorized changeMaker can call withdrawNinetyEightPercent()");
+
+    ///Update state on the project to prevent funding from being withdrawn more than once
+    project.hasWithdrawnNinetyEightPercent = true;
+    //Calculate 98% of final project funding
+    project.ninetyEightPercentFunding = project.currentFunding * 98 / 100;
+    ///Transfer 98% of the project funding to the changeMaker that created this project
+    dai.transfer(msg.sender, project.ninetyEightPercentFunding);
+  }
 }
+
 
 interface Dai {
     function transfer(address dst, uint wad) external returns (bool);

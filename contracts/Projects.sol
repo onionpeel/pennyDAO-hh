@@ -106,11 +106,12 @@ contract Projects is Sponsors, Ownable {
       sponsorId: currentSponsorId,
       fundingAmount: _amount
     });
-
+    ///The sponsor information gets stored
     projectSponsorIds[_projectId].push(currentSponsorId);
     sponsors[currentSponsorId] = newSponsor;
-
+    ///The sponsor's dai get transferred to this contract
     dai.transferFrom(msg.sender, address(this), _amount);
+    
   }
 
   ///@notice Retrieves the current funding for a specific project

@@ -16,3 +16,7 @@
 5. Changes in ChangeDao flow slide
   a) remove erc20 token and replace with points mechanism in Exchange.sol
   b) show direct funding from sponsor to a specific project
+
+6. Should there be a minimum funding amount to become a sponsor?  At least one dai/stablecoin?
+
+7. The amount of stablecoin in DevTeam.sol and CommunityFund.sol must always be enough to refund the projects that are currently being funded but not yet fully funded.  This is so that the sponsors can be refunded if returnFundsToAllSponsors() is called.

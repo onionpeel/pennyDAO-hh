@@ -107,7 +107,18 @@ describe('Projects.sol', () => {
   });
 
   it('Projects: sponsor1 funds a project and gets listed as a sponsor', async () => {
+    let fullAmount = '700';
+
+    let onePercent = ethers.utils.parseEther('700').div(100);
+    let ninetyEightPercent = ethers.utils.parseEther(fullAmount).sub(onePercent).sub(onePercent);
+    console.log(ethers.utils.parseEther(fullAmount).toString());
+    console.log(onePercent.toString());
+    console.log(ninetyEightPercent.toString());
+    expect(ethers.utils.formatEther(ninetyEightPercent.add(onePercent).add(onePercent))).to.equal('700.0');
+    console.log(ethers.utils.formatEther(ninetyEightPercent.add(onePercent).add(onePercent)));
+
     let amount = ethers.utils.parseEther('700');
+
     let daiContract = await ethers.getContractAt('IERC20', '0x6b175474e89094c44da98b954eedeac495271d0f');
 
     projectsSponsor1 = projects.connect(sponsor1);

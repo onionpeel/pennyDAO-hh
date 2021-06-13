@@ -186,4 +186,10 @@ describe('Projects.sol', () => {
     let organization1Balance = await daiContract.balanceOf(organization1.address);
     expect(ethers.utils.formatEther(organization1Balance)).to.equal('980.0');
   });
+
+  it('Projects: ChangeDAO calls withdrawTwoPercent()', async () => {
+    await projects.withdrawTwoPercent(ethers.BigNumber.from('2'));
+    let changeDAOBalance = await daiContract.balanceOf(changeDAO.address);
+    expect(ethers.utils.formatEther(changeDAOBalance)).to.equal('20.0');
+  });
 });

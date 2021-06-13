@@ -23,6 +23,7 @@ contract Projects is Sponsors, Ownable {
     bool isFullyFunded;
     bool hasMinted;
     bool hasWithdrawnNinetyEightPercent;
+    bool hasWithdrawnTwoPercent;
   }
 
   ///@notice References all of the project ids of a particular changeMaker
@@ -70,7 +71,8 @@ contract Projects is Sponsors, Ownable {
       ninetyEightPercentFunding: 0,
       isFullyFunded: false,
       hasMinted: false,
-      hasWithdrawnNinetyEightPercent: false
+      hasWithdrawnNinetyEightPercent: false,
+      hasWithdrawnTwoPercent: false
     });
 
     //Set the new project in the projectsIds mapping
@@ -177,6 +179,7 @@ contract Projects is Sponsors, Ownable {
     impactNFT_Generator.mintTokens(sponsorArray);
   }
 
+  /*@notice The changeMaker that created a specific project can withdraw 98% of its funding after minting tokens*/
   function withdrawNinetyEightPercent(uint256 _projectId) public {
     ///Security check
     Project storage project = projects[_projectId];
@@ -200,6 +203,22 @@ contract Projects is Sponsors, Ownable {
     project.ninetyEightPercentFunding = project.currentFunding * 98 / 100;
     ///Transfer 98% of the project funding to the changeMaker that created this project
     dai.transfer(msg.sender, project.ninetyEightPercentFunding);
+  }
+
+  ///@notice ChangeDAO can withdraw 2% of a project's funding after its tokens have been minted
+  function withdrawTwoPercent(uint256 _projectId) public onlyOwner {
+    //Security check
+    Project storage project = projects[_projectId];
+    require(project.hasMinted, "NFTs for this project have already been minted");
+    require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    require(!project.hasWithdrawnTwoPercent, "2% has already been withdrawn from this project");
+
+    ///Change state of the project to prevent 2% from being withdrawn more than once
+    project.hasWithdrawnTwoPercent = true;
+    ///Calculate 2% of the received funding for this project
+    uint256 twoPercent = project.currentFunding - (project.currentFunding * 98 / 100);
+    ///Transfer the 2% to changeDAO
+    dai.transfer(msg.sender, twoPercent);
   }
 }
 

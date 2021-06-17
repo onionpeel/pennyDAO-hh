@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const { upgrades } = require("hardhat");
 
 describe('upgrade', () => {
-  let changeMakers, impactNFT_Generator, projects; //contract instances
+  let sponsors, changeMakers, impactNFT_Generator, projects; //contract instances
   let changeDAO, organization1, sponsor1, sponsor2; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
   let daiContract;
@@ -35,6 +35,9 @@ describe('upgrade', () => {
   });
 
   it('Deploys ChangeMakers, ImpactNFT_Generator, Projects contracts', async () => {
+      Sponsors = await hre.ethers.getContractFactory('Sponsors');
+      sponsors = await upgrades.deployProxy(Sponsors);
+
       ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
       changeMakers = await upgrades.deployProxy(ChangeMakers);
 
@@ -42,20 +45,20 @@ describe('upgrade', () => {
       // impactNFT_Generator = await ImpactNFT_Generator.deploy('Proof of Impact', 'IMPACT');
       impactNFT_Generator = await upgrades.deployProxy(
         ImpactNFT_Generator,
-        ['Proof of Impact', 'IMPACT'],
+        ['Proof of Impact', 'IMPACT', sponsors.address],
         { initializer: 'initialize'}
       );
 
-      const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
-      Projects = await hre.ethers.getContractFactory('Projects');
-      projects = await upgrades.deployProxy(
-          Projects,
-          [changeMakers.address, impactNFT_Generator.address, daiAddress],
-          { initializer: 'initialize'}
-      );
+      // const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
+      // Projects = await hre.ethers.getContractFactory('Projects');
+      // projects = await upgrades.deployProxy(
+      //     Projects,
+      //     [changeMakers.address, impactNFT_Generator.address, daiAddress],
+      //     { initializer: 'initialize'}
+      // );
       // projects = await Projects.deploy(changeMakers.address, impactNFT_Generator.address, daiAddress);
 
-      daiContract = await ethers.getContractAt('IERC20', daiAddress);
+      // daiContract = await ethers.getContractAt('IERC20', daiAddress);
   });
 
   // it('ChangeMakers: becomeChangeMaker()', async () => {

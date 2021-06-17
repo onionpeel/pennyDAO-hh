@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-xdescribe('Projects.sol', () => {
+xdescribe('refund', () => {
   let changeMakers, impactNFT_Generator, projects; //contract instances
   let changeDAO, organization1, sponsor1, sponsor2; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()

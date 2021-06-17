@@ -1,15 +1,18 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
+// import "@openzeppelin/contracts/utils/Counters.sol";
 import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import './ChangeMakers.sol';
 import './Sponsors.sol';
 import './ImpactNFT_Generator.sol';
 
 ///@title changeMakers create projects
-contract Projects is Sponsors, Ownable {
-  using Counters for Counters.Counter;
+contract Projects is Sponsors, OwnableUpgradeable {
+  using CountersUpgradeable for CountersUpgradeable.Counter;
   ///This structure holds the data for a single project created by a changeMaker
   struct Project {
     address changeMaker;
@@ -33,14 +36,28 @@ contract Projects is Sponsors, Ownable {
   ///@notice References a project id to all of its sponsor ids
   mapping (uint256 => uint256[]) public projectSponsorIds;
 
-  Counters.Counter sponsorCount;
-  Counters.Counter projectCount;
+  CountersUpgradeable.Counter sponsorCount;
+  CountersUpgradeable.Counter projectCount;
 
   ChangeMakers changeMakers;
   ImpactNFT_Generator impactNFT_Generator;
   Dai dai;
 
-  constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator, address daiAddress) {
+  // constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator, address daiAddress) {
+  //   changeMakers = _changeMakers;
+  //   impactNFT_Generator = _impactNFT_Generator;
+  //   dai = Dai(daiAddress);
+  // }
+
+  ///@notice This contract is upgradeable, so this function takes the place of the constructor
+  function initialize(
+    ChangeMakers _changeMakers,
+    ImpactNFT_Generator _impactNFT_Generator,
+    address daiAddress
+  )
+    public
+    initializer
+  {
     changeMakers = _changeMakers;
     impactNFT_Generator = _impactNFT_Generator;
     dai = Dai(daiAddress);

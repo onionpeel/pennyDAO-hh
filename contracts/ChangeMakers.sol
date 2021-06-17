@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/access/Ownable.sol';
-import "@openzeppelin/contracts/utils/Counters.sol";
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 ///@title Create and manage information about the organizations that register as changeMakers
-contract ChangeMakers is Ownable {
-  using Counters for Counters.Counter;
+contract ChangeMakers is OwnableUpgradeable {
+  using CountersUpgradeable for CountersUpgradeable.Counter;
   ///@notice This structure holds data about a registered changeMaker
   struct ChangeMaker {
     address organization;
@@ -15,7 +15,7 @@ contract ChangeMakers is Ownable {
   }
 
   ///@notice Id of the most recently created changeMaker
-  Counters.Counter changeMakerCount;
+  CountersUpgradeable.Counter changeMakerCount;
   ///@notice Retrieve a changeMaker address based on the changeMaker's id
   mapping (uint256 => address) public changeMakerAddress;
   ///@notice Retrieve a specific ChangeMaker struct based on the changeMaker's address
@@ -75,7 +75,7 @@ contract ChangeMakers is Ownable {
     return isAuthorized[_changeMaker];
   }
 
-  ///@notice ChangeDAO can remove a changeMaker's authorization 
+  ///@notice ChangeDAO can remove a changeMaker's authorization
   function removeAuthorization(address _changeMaker) public onlyOwner {
     isAuthorized[_changeMaker] = false;
     emit RemovedChangeMakerAuthorization(_changeMaker);

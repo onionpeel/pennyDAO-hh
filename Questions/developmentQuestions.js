@@ -30,3 +30,5 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
 13.  projectSponsorIds will be a problem as more sponsors get listed because it keeps track of all sponsors in this mapping.  The sponsors need to be enumerated per project so the numbers do not grow to large.  The problem arises in the event of a refund, in which all the sponsor ids must be looped over to check if they are in the array of sponsors for a given project.
 
 14. Is the math in Projects: withdrawNinetyEightPercent() a safe way to calculate the 98%?
+
+15. What is the proper order of elements inside a contract?

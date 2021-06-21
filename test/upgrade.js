@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { upgrades } = require("hardhat");
 
-describe('upgrade', () => {
+xdescribe('upgrade', () => {
   let sponsors, changeMakers, impactNFT_Generator, projects; //contract instances
   let changeDAO, organization1, sponsor1, sponsor2; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
@@ -35,8 +35,8 @@ describe('upgrade', () => {
   });
 
   it('Deploys ChangeMakers, ImpactNFT_Generator, Projects contracts', async () => {
-      Sponsors = await hre.ethers.getContractFactory('Sponsors');
-      sponsors = await upgrades.deployProxy(Sponsors);
+      // Sponsors = await hre.ethers.getContractFactory('Sponsors');
+      // sponsors = await upgrades.deployProxy(Sponsors);
 
       ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
       changeMakers = await upgrades.deployProxy(ChangeMakers);
@@ -45,35 +45,37 @@ describe('upgrade', () => {
       // impactNFT_Generator = await ImpactNFT_Generator.deploy('Proof of Impact', 'IMPACT');
       impactNFT_Generator = await upgrades.deployProxy(
         ImpactNFT_Generator,
-        ['Proof of Impact', 'IMPACT', sponsors.address],
+        ['Proof of Impact', 'IMPACT'],
         { initializer: 'initialize'}
       );
 
-      // const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
-      // Projects = await hre.ethers.getContractFactory('Projects');
-      // projects = await upgrades.deployProxy(
-      //     Projects,
-      //     [changeMakers.address, impactNFT_Generator.address, daiAddress],
-      //     { initializer: 'initialize'}
-      // );
+      const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
+      Projects = await hre.ethers.getContractFactory('Projects');
+      projects = await upgrades.deployProxy(
+          Projects,
+          [changeMakers.address, impactNFT_Generator.address, daiAddress],
+          { initializer: 'initialize'}
+      );
       // projects = await Projects.deploy(changeMakers.address, impactNFT_Generator.address, daiAddress);
 
-      // daiContract = await ethers.getContractAt('IERC20', daiAddress);
+      daiContract = await ethers.getContractAt('IERC20', daiAddress);
   });
 
-  // it('ChangeMakers: becomeChangeMaker()', async () => {
-  //   //ChangeDAO authorizes organization1.address to become a changeMaker
-  //   await changeMakers.authorize(organization1.address);
-  //   //Check the authorization status of organization1
-  //   const isUser1Authorized = await changeMakers.checkAuthorization(organization1.address);
-  //   expect(isUser1Authorized).to.equal(true);
-  //
-  //   //organization1 registers as a new changeMaker
-  //   await changeMakers.connect(organization1).becomeChangeMaker(
-  //     "XYZ Charity", //name
-  //   );
-  // });
-  //
+  it('ChangeMakers: becomeChangeMaker()', async () => {
+    //ChangeDAO authorizes organization1.address to become a changeMaker
+    let owner = await changeMakers.owner();
+    console.log(owner)
+    // await changeMakers.authorize(organization1.address);
+    //Check the authorization status of organization1
+    // const isUser1Authorized = await changeMakers.checkAuthorization(organization1.address);
+    // expect(isUser1Authorized).to.equal(true);
+
+    //organization1 registers as a new changeMaker
+    // await changeMakers.connect(organization1).becomeChangeMaker(
+    //   "XYZ Charity", //name
+    // );
+  });
+
   // it('Projects: createProject(), getChangeMakerProjects()', async () => {
   //   //organization1 creates three new projects
   //   expirationTime = expiresInOneHour();
@@ -100,7 +102,7 @@ describe('upgrade', () => {
   //   expect(XYZprojectArray[1].toNumber()).to.equal(2);
   //   expect(XYZprojectArray[2].toNumber()).to.equal(3);
   // });
-  //
+
   // it('sponsor1 acquires DAI', async () => {
   //   //impersonate externally owned account found on etherscan (this is Binance8)
   //   await hre.network.provider.request({

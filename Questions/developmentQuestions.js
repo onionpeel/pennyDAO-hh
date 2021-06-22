@@ -32,3 +32,14 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
 14. Is the math in Projects: withdrawNinetyEightPercent() a safe way to calculate the 98%?
 
 15. What is the proper order of elements inside a contract?
+
+16. The ERC721 is not upgradeable right now. Should it be?  If yes, the structure can look like this::
+
+    contract MyContract is Initializable {
+        IERC20Upgradeable public token;
+
+        function initialize(IERC20Upgradeable _token) public initializer {
+            token = _token;
+        }
+    }
+https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable

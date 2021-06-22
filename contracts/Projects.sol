@@ -49,7 +49,7 @@ contract Projects is Sponsors, OwnableUpgradeable {
   //   dai = Dai(daiAddress);
   // }
 
-  ///@notice This contract is upgradeable, so this function takes the place of the constructor
+  ///@notice Upgradeable contracts cannot use constructors. Once the contract is deployed, this initialize function is called to set variables that would normally be set inside of a constructor.
   function initialize(
     ChangeMakers _changeMakers,
     ImpactNFT_Generator _impactNFT_Generator,
@@ -61,6 +61,8 @@ contract Projects is Sponsors, OwnableUpgradeable {
     changeMakers = _changeMakers;
     impactNFT_Generator = _impactNFT_Generator;
     dai = Dai(daiAddress);
+    ///In the non-upgradeable version of Ownable, the constuctor in the Ownable contract is automatically called when Projects is deployed.  But constructors cannot be used with the proxy pattern, so the Ownable's initialize() function must be called manually.
+    __Ownable_init();
   }
 
   ///@notice An authorized changeMaker calls this function to create a new project

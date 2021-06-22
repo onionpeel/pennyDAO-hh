@@ -5,7 +5,7 @@ import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 ///@title Create and manage information about the organizations that register as changeMakers
-contract ChangeMakers is OwnableUpgradeable {
+contract ChangeMakers2 is OwnableUpgradeable {
   using CountersUpgradeable for CountersUpgradeable.Counter;
   ///@notice This structure holds data about a registered changeMaker
   struct ChangeMaker {
@@ -23,6 +23,16 @@ contract ChangeMakers is OwnableUpgradeable {
   ///@notice Retrieves whether or not a particular changeMaker is authorized by ChangeDAO
   mapping (address => bool) isAuthorized;
 
+
+  ///@notice This is a new storage value that has been added to test upgradability
+  uint256 public storageValue;
+
+  function setStorageValue(uint256 _storageValue) public {
+    storageValue = _storageValue;
+  }
+
+
+
   ///@notice Emitted when an organization becomes a changeMaker
   event AddedChangeMaker(
     address indexed organization,
@@ -39,9 +49,11 @@ contract ChangeMakers is OwnableUpgradeable {
   );
 
   ///@notice Upgradeable contracts cannot use constructors. Once the contract is deployed, this initialize function is called to set variables that would normally be set inside of a constructor.
-  function initialize() public initializer {
-    __Ownable_init();
-  }
+  ///@dev _storageValue has been added to test contract upgradability
+  // function initialize(uint256 _storageValue) public initializer {
+  //   __Ownable_init();
+  //   storageValue = _storageValue;
+  // }
 
   /*@notice This is called by the changeMaker only after their registration has been reviewed and ChangeDAO has called authorize() to authorize the changeMaker.*/
   function becomeChangeMaker(

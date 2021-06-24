@@ -1,14 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-// import "@openzeppelin/contracts/utils/Counters.sol";
-import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import './ChangeMakers.sol';
+import './ChangeMakers2.sol';
 import './Sponsors.sol';
-import './ImpactNFT_Generator.sol';
+import './ImpactNFT_Generator2.sol';
 
 interface Dai {
     function transfer(address dst, uint wad) external returns (bool);
@@ -17,7 +14,7 @@ interface Dai {
 }
 
 ///@title changeMakers create projects
-contract Projects is Sponsors, OwnableUpgradeable {
+contract Projects2 is Sponsors, OwnableUpgradeable {
   using CountersUpgradeable for CountersUpgradeable.Counter;
   ///This structure holds the data for a single project created by a changeMaker
   struct Project {
@@ -45,30 +42,28 @@ contract Projects is Sponsors, OwnableUpgradeable {
   CountersUpgradeable.Counter sponsorCount;
   CountersUpgradeable.Counter projectCount;
 
-  ChangeMakers changeMakers;
-  ImpactNFT_Generator impactNFT_Generator;
+  ChangeMakers2 changeMakers;
+  ImpactNFT_Generator2 impactNFT_Generator;
   Dai dai;
 
-  // constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator, address daiAddress) {
-  //   changeMakers = _changeMakers;
-  //   impactNFT_Generator = _impactNFT_Generator;
-  //   dai = Dai(daiAddress);
-  // }
+  ///@notice This is a new storage value that has been added to test upgradability
+  uint256 public storageValue;
+  ///@notice This function is only used to test upgradability
+  function setStorageValue(uint256 _storageValue) public {
+    storageValue = _storageValue;
+  }
 
-  ///@notice Upgradeable contracts cannot use constructors. Once the contract is deployed, this initialize function is called to set variables that would normally be set inside of a constructor.
-  function initialize(
-    ChangeMakers _changeMakers,
-    ImpactNFT_Generator _impactNFT_Generator,
+  ///@notice Projects2.sol is replacing Projects.sol. Upgradeable contracts cannot use constructors.  If Changemakers.sol or ImpactNFT_Generator.sol have been upgraded, this function can be called so that Projcts2.sol refers to the upgraded versions.
+  function reInitialize(
+    ChangeMakers2 _changeMakers,
+    ImpactNFT_Generator2 _impactNFT_Generator,
     address daiAddress
   )
     public
-    initializer
   {
     changeMakers = _changeMakers;
     impactNFT_Generator = _impactNFT_Generator;
     dai = Dai(daiAddress);
-    ///In the non-upgradeable version of Ownable, the constuctor in the Ownable contract is automatically called when Projects is deployed.  But constructors cannot be used with the proxy pattern, so the Ownable's initialize() function must be called manually.
-    __Ownable_init();
   }
 
   ///@notice An authorized changeMaker calls this function to create a new project

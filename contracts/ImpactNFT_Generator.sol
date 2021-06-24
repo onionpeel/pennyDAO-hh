@@ -3,11 +3,7 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-// import '@openzeppelin/contracts/utils/Counters.sol';
-import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
-import '@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol';
-import './Projects.sol';
+import './Sponsors.sol';
 
 contract ImpactNFT_Generator is ERC721URIStorageUpgradeable, Sponsors {
   using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -23,13 +19,6 @@ contract ImpactNFT_Generator is ERC721URIStorageUpgradeable, Sponsors {
   {
     __ERC721_init(name, symbol);
   }
-
-  // function initialize(string memory name, string memory symbol) public initializer {
-  //   ERC721(name, symbol);
-  // }
-
-  // constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
-
 
   ///@notice This function is called by Project: createTokens() and it mints all the NFTs for a project
   function mintTokens(SponsorTokenData[] memory sponsorArray) public {

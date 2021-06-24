@@ -32,7 +32,6 @@ contract ChangeMakers2 is OwnableUpgradeable {
   }
 
 
-
   ///@notice Emitted when an organization becomes a changeMaker
   event AddedChangeMaker(
     address indexed organization,
@@ -47,13 +46,6 @@ contract ChangeMakers2 is OwnableUpgradeable {
   event RemovedChangeMakerAuthorization(
     address indexed organization
   );
-
-  ///@notice Upgradeable contracts cannot use constructors. Once the contract is deployed, this initialize function is called to set variables that would normally be set inside of a constructor.
-  ///@dev _storageValue has been added to test contract upgradability
-  // function initialize(uint256 _storageValue) public initializer {
-  //   __Ownable_init();
-  //   storageValue = _storageValue;
-  // }
 
   /*@notice This is called by the changeMaker only after their registration has been reviewed and ChangeDAO has called authorize() to authorize the changeMaker.*/
   function becomeChangeMaker(

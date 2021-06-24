@@ -49,12 +49,6 @@ contract Projects is Sponsors, OwnableUpgradeable {
   ImpactNFT_Generator impactNFT_Generator;
   Dai dai;
 
-  // constructor(ChangeMakers _changeMakers, ImpactNFT_Generator _impactNFT_Generator, address daiAddress) {
-  //   changeMakers = _changeMakers;
-  //   impactNFT_Generator = _impactNFT_Generator;
-  //   dai = Dai(daiAddress);
-  // }
-
   ///@notice Upgradeable contracts cannot use constructors. Once the contract is deployed, this initialize function is called to set variables that would normally be set inside of a constructor.
   function initialize(
     ChangeMakers _changeMakers,

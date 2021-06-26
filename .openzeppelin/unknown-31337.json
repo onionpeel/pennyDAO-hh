@@ -7,7 +7,7 @@
       "hash": "0x3769b2c5208b943d2f3655f9d9944ff169d90ea426929c17e3598634daa06e53",
       "type": 0,
       "accessList": null,
-      "blockHash": "0xbb1a70e6c1ad1c1879d30ec81dc439151932fa95079284f021f4de3668e3786f",
+      "blockHash": "0x41fb0ac485c4f24547f28cb102f6e54920de3d673432132a09979f50ed56b87c",
       "blockNumber": 12615002,
       "transactionIndex": 0,
       "confirmations": 1,
@@ -52,14 +52,14 @@
     },
     {
       "address": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
-      "txHash": "0x37ad7f731c7d1053196d5787471c5c1150b185744be1e573ecca3e16570e0331",
+      "txHash": "0xb12f74353997d10ca99f1273cbb51573399b956eda3bf265b709776be2665931",
       "kind": "transparent"
     }
   ],
   "impls": {
     "7f4a12abe3066d8742956f181dfefffd4a940fa6524a410606cb352b49a9d70e": {
       "address": "0x998abeb3E57409262aE5b751f60747921B33613E",
-      "txHash": "0xd2cda7de6f8c20cb657731c8ec16a0d58e7dd1f96cd795c11b05143168dc6ad3",
+      "txHash": "0xc81da07ad8c89d9fa6d57917942e68bab4dc3031f879cbe2b1b2255adcfb1fd1",
       "layout": {
         "storage": [
           {
@@ -144,19 +144,19 @@
             "contract": "Sponsors",
             "label": "projectsOfASponsor",
             "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
-            "src": "contracts\\Sponsors.sol:27"
+            "src": "contracts\\Sponsors.sol:28"
           },
           {
             "contract": "Sponsors",
             "label": "sponsors",
-            "type": "t_mapping(t_uint256,t_struct(Sponsor)4001_storage)",
-            "src": "contracts\\Sponsors.sol:29"
+            "type": "t_mapping(t_uint256,t_struct(Sponsor)3187_storage)",
+            "src": "contracts\\Sponsors.sol:30"
           },
           {
             "contract": "Sponsors",
             "label": "currentSponsorId",
             "type": "t_uint256",
-            "src": "contracts\\Sponsors.sol:31"
+            "src": "contracts\\Sponsors.sol:32"
           },
           {
             "contract": "ImpactNFT_Generator",
@@ -187,10 +187,10 @@
           "t_array(t_uint256)dyn_storage": {
             "label": "uint256[]"
           },
-          "t_mapping(t_uint256,t_struct(Sponsor)4001_storage)": {
+          "t_mapping(t_uint256,t_struct(Sponsor)3187_storage)": {
             "label": "mapping(uint256 => struct Sponsors.Sponsor)"
           },
-          "t_struct(Sponsor)4001_storage": {
+          "t_struct(Sponsor)3187_storage": {
             "label": "struct Sponsors.Sponsor",
             "members": [
               {
@@ -208,14 +208,18 @@
               {
                 "label": "sponsorFundingAmount",
                 "type": "t_uint256"
+              },
+              {
+                "label": "sponsorStablecoin",
+                "type": "t_string_storage"
               }
             ]
           },
-          "t_mapping(t_uint256,t_string_storage)": {
-            "label": "mapping(uint256 => string)"
-          },
           "t_string_storage": {
             "label": "string"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]"
@@ -294,7 +298,7 @@
           {
             "contract": "ChangeMakers",
             "label": "changeMakers",
-            "type": "t_mapping(t_address,t_struct(ChangeMaker)2103_storage)",
+            "type": "t_mapping(t_address,t_struct(ChangeMaker)2181_storage)",
             "src": "contracts\\ChangeMakers.sol:22"
           },
           {
@@ -323,10 +327,10 @@
           "t_address": {
             "label": "address"
           },
-          "t_mapping(t_address,t_struct(ChangeMaker)2103_storage)": {
+          "t_mapping(t_address,t_struct(ChangeMaker)2181_storage)": {
             "label": "mapping(address => struct ChangeMakers.ChangeMaker)"
           },
-          "t_struct(ChangeMaker)2103_storage": {
+          "t_struct(ChangeMaker)2181_storage": {
             "label": "struct ChangeMakers.ChangeMaker",
             "members": [
               {
@@ -357,237 +361,6 @@
           },
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]"
-          }
-        }
-      }
-    },
-    "ecb3f2a683d9e36ff281656067cdb2d45dc271f8cd40a51de54e7bcfdc1110c2": {
-      "address": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
-      "txHash": "0x83e77e13d99d65766a25504d0170e16ee2e3c2337eb401fb411b419d9f206d3f",
-      "layout": {
-        "storage": [
-          {
-            "contract": "Sponsors",
-            "label": "projectsOfASponsor",
-            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
-            "src": "contracts\\Sponsors.sol:27"
-          },
-          {
-            "contract": "Sponsors",
-            "label": "sponsors",
-            "type": "t_mapping(t_uint256,t_struct(Sponsor)4001_storage)",
-            "src": "contracts\\Sponsors.sol:29"
-          },
-          {
-            "contract": "Sponsors",
-            "label": "currentSponsorId",
-            "type": "t_uint256",
-            "src": "contracts\\Sponsors.sol:31"
-          },
-          {
-            "contract": "Initializable",
-            "label": "_initialized",
-            "type": "t_bool",
-            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:23"
-          },
-          {
-            "contract": "Initializable",
-            "label": "_initializing",
-            "type": "t_bool",
-            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:28"
-          },
-          {
-            "contract": "ContextUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)50_storage",
-            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
-          },
-          {
-            "contract": "OwnableUpgradeable",
-            "label": "_owner",
-            "type": "t_address",
-            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:20"
-          },
-          {
-            "contract": "OwnableUpgradeable",
-            "label": "__gap",
-            "type": "t_array(t_uint256)49_storage",
-            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:74"
-          },
-          {
-            "contract": "Projects",
-            "label": "changeMakerProjects",
-            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
-            "src": "contracts\\Projects.sol:39"
-          },
-          {
-            "contract": "Projects",
-            "label": "projects",
-            "type": "t_mapping(t_uint256,t_struct(Project)2673_storage)",
-            "src": "contracts\\Projects.sol:41"
-          },
-          {
-            "contract": "Projects",
-            "label": "projectSponsorIds",
-            "type": "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)",
-            "src": "contracts\\Projects.sol:43"
-          },
-          {
-            "contract": "Projects",
-            "label": "sponsorCount",
-            "type": "t_struct(Counter)1636_storage",
-            "src": "contracts\\Projects.sol:45"
-          },
-          {
-            "contract": "Projects",
-            "label": "projectCount",
-            "type": "t_struct(Counter)1636_storage",
-            "src": "contracts\\Projects.sol:46"
-          },
-          {
-            "contract": "Projects",
-            "label": "changeMakers",
-            "type": "t_contract(ChangeMakers)2259",
-            "src": "contracts\\Projects.sol:48"
-          },
-          {
-            "contract": "Projects",
-            "label": "impactNFT_Generator",
-            "type": "t_contract(ImpactNFT_Generator)2520",
-            "src": "contracts\\Projects.sol:49"
-          },
-          {
-            "contract": "Projects",
-            "label": "dai",
-            "type": "t_contract(Dai)2639",
-            "src": "contracts\\Projects.sol:50"
-          }
-        ],
-        "types": {
-          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
-            "label": "mapping(address => uint256[])"
-          },
-          "t_address": {
-            "label": "address"
-          },
-          "t_array(t_uint256)dyn_storage": {
-            "label": "uint256[]"
-          },
-          "t_uint256": {
-            "label": "uint256"
-          },
-          "t_mapping(t_uint256,t_struct(Project)2673_storage)": {
-            "label": "mapping(uint256 => struct Projects.Project)"
-          },
-          "t_struct(Project)2673_storage": {
-            "label": "struct Projects.Project",
-            "members": [
-              {
-                "label": "changeMaker",
-                "type": "t_address"
-              },
-              {
-                "label": "name",
-                "type": "t_string_storage"
-              },
-              {
-                "label": "creationTime",
-                "type": "t_uint256"
-              },
-              {
-                "label": "expirationTime",
-                "type": "t_uint256"
-              },
-              {
-                "label": "id",
-                "type": "t_uint256"
-              },
-              {
-                "label": "fundingThreshold",
-                "type": "t_uint256"
-              },
-              {
-                "label": "currentFunding",
-                "type": "t_uint256"
-              },
-              {
-                "label": "ninetyEightPercentFunding",
-                "type": "t_uint256"
-              },
-              {
-                "label": "isFullyFunded",
-                "type": "t_bool"
-              },
-              {
-                "label": "hasMinted",
-                "type": "t_bool"
-              },
-              {
-                "label": "hasWithdrawnNinetyEightPercent",
-                "type": "t_bool"
-              },
-              {
-                "label": "hasWithdrawnTwoPercent",
-                "type": "t_bool"
-              }
-            ]
-          },
-          "t_string_storage": {
-            "label": "string"
-          },
-          "t_bool": {
-            "label": "bool"
-          },
-          "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)": {
-            "label": "mapping(uint256 => uint256[])"
-          },
-          "t_struct(Counter)1636_storage": {
-            "label": "struct CountersUpgradeable.Counter",
-            "members": [
-              {
-                "label": "_value",
-                "type": "t_uint256"
-              }
-            ]
-          },
-          "t_contract(ChangeMakers)2259": {
-            "label": "contract ChangeMakers"
-          },
-          "t_contract(ImpactNFT_Generator)2520": {
-            "label": "contract ImpactNFT_Generator"
-          },
-          "t_contract(Dai)2639": {
-            "label": "contract Dai"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]"
-          },
-          "t_mapping(t_uint256,t_struct(Sponsor)4001_storage)": {
-            "label": "mapping(uint256 => struct Sponsors.Sponsor)"
-          },
-          "t_struct(Sponsor)4001_storage": {
-            "label": "struct Sponsors.Sponsor",
-            "members": [
-              {
-                "label": "sponsorAddress",
-                "type": "t_address"
-              },
-              {
-                "label": "projectId",
-                "type": "t_uint256"
-              },
-              {
-                "label": "sponsorId",
-                "type": "t_uint256"
-              },
-              {
-                "label": "sponsorFundingAmount",
-                "type": "t_uint256"
-              }
-            ]
           }
         }
       }
@@ -910,7 +683,7 @@
     },
     "3337227797eee906b5fcb0832e95b3de8852a021ad170e5763f1ebc8a9226386": {
       "address": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
-      "txHash": "0x9b08c5b8e18e8e1ec935fe7ba7902d703befb7da3bd450750f71410d6cc73d99",
+      "txHash": "0xf93543fd55ffed0acb0055494b09ce5e4f4a2267811bf2803af70bbf10a766d9",
       "layout": {
         "storage": [
           {
@@ -1139,6 +912,247 @@
               {
                 "label": "sponsorFundingAmount",
                 "type": "t_uint256"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "00cbaac2b1eb45cf4ce39f4b7b9e2bed29c060c2d7a5246b92af9fc94dc2d79b": {
+      "address": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
+      "txHash": "0x6499890755073a420752048c810dc380e4f4d042cad9bc758ae9da7245325c10",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Sponsors",
+            "label": "projectsOfASponsor",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "src": "contracts\\Sponsors.sol:28"
+          },
+          {
+            "contract": "Sponsors",
+            "label": "sponsors",
+            "type": "t_mapping(t_uint256,t_struct(Sponsor)3187_storage)",
+            "src": "contracts\\Sponsors.sol:30"
+          },
+          {
+            "contract": "Sponsors",
+            "label": "currentSponsorId",
+            "type": "t_uint256",
+            "src": "contracts\\Sponsors.sol:32"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:23"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:28"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "Projects",
+            "label": "changeMakerProjects",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "src": "contracts\\Projects.sol:35"
+          },
+          {
+            "contract": "Projects",
+            "label": "projects",
+            "type": "t_mapping(t_uint256,t_struct(Project)2465_storage)",
+            "src": "contracts\\Projects.sol:37"
+          },
+          {
+            "contract": "Projects",
+            "label": "projectSponsorIds",
+            "type": "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)",
+            "src": "contracts\\Projects.sol:39"
+          },
+          {
+            "contract": "Projects",
+            "label": "sponsorCount",
+            "type": "t_struct(Counter)1636_storage",
+            "src": "contracts\\Projects.sol:41"
+          },
+          {
+            "contract": "Projects",
+            "label": "projectCount",
+            "type": "t_struct(Counter)1636_storage",
+            "src": "contracts\\Projects.sol:42"
+          },
+          {
+            "contract": "Projects",
+            "label": "changeMakers",
+            "type": "t_contract(ChangeMakers)2337",
+            "src": "contracts\\Projects.sol:44"
+          },
+          {
+            "contract": "Projects",
+            "label": "impactNFT_Generator",
+            "type": "t_contract(ImpactNFT_Generator)2421",
+            "src": "contracts\\Projects.sol:45"
+          },
+          {
+            "contract": "Projects",
+            "label": "dai",
+            "type": "t_contract(IERC20)2140",
+            "src": "contracts\\Projects.sol:46"
+          },
+          {
+            "contract": "Projects",
+            "label": "usdc",
+            "type": "t_contract(IERC20)2140",
+            "src": "contracts\\Projects.sol:47"
+          }
+        ],
+        "types": {
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_struct(Project)2465_storage)": {
+            "label": "mapping(uint256 => struct Projects.Project)"
+          },
+          "t_struct(Project)2465_storage": {
+            "label": "struct Projects.Project",
+            "members": [
+              {
+                "label": "changeMaker",
+                "type": "t_address"
+              },
+              {
+                "label": "name",
+                "type": "t_string_storage"
+              },
+              {
+                "label": "creationTime",
+                "type": "t_uint256"
+              },
+              {
+                "label": "expirationTime",
+                "type": "t_uint256"
+              },
+              {
+                "label": "id",
+                "type": "t_uint256"
+              },
+              {
+                "label": "fundingThreshold",
+                "type": "t_uint256"
+              },
+              {
+                "label": "currentFunding",
+                "type": "t_uint256"
+              },
+              {
+                "label": "ninetyEightPercentFunding",
+                "type": "t_uint256"
+              },
+              {
+                "label": "isFullyFunded",
+                "type": "t_bool"
+              },
+              {
+                "label": "hasMinted",
+                "type": "t_bool"
+              },
+              {
+                "label": "hasWithdrawnNinetyEightPercent",
+                "type": "t_bool"
+              },
+              {
+                "label": "hasWithdrawnTwoPercent",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint256 => uint256[])"
+          },
+          "t_struct(Counter)1636_storage": {
+            "label": "struct CountersUpgradeable.Counter",
+            "members": [
+              {
+                "label": "_value",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_contract(ChangeMakers)2337": {
+            "label": "contract ChangeMakers"
+          },
+          "t_contract(ImpactNFT_Generator)2421": {
+            "label": "contract ImpactNFT_Generator"
+          },
+          "t_contract(IERC20)2140": {
+            "label": "contract IERC20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_mapping(t_uint256,t_struct(Sponsor)3187_storage)": {
+            "label": "mapping(uint256 => struct Sponsors.Sponsor)"
+          },
+          "t_struct(Sponsor)3187_storage": {
+            "label": "struct Sponsors.Sponsor",
+            "members": [
+              {
+                "label": "sponsorAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "projectId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "sponsorId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "sponsorFundingAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "sponsorStablecoin",
+                "type": "t_string_storage"
               }
             ]
           }

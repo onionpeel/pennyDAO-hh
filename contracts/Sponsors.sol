@@ -10,6 +10,7 @@ contract Sponsors {
     uint256 projectId;
     uint256 sponsorId;
     uint256 sponsorFundingAmount;
+    string sponsorStablecoin;
   }
   ///@notice An array of this type of struct is passed into createTokens() in order to mint the NFTs
   struct SponsorTokenData {

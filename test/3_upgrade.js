@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { upgrades } = require("hardhat");
 
-describe('upgrade', () => {
+xdescribe('upgrade', () => {
   // contract instances
   let sponsors, changeMakers, changeMakers2, impactNFT_Generator, impactNFT_Generator2,
     projects, projects2;

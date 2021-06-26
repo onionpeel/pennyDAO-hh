@@ -6,15 +6,11 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './ChangeMakers.sol';
 import './Sponsors.sol';
 import './ImpactNFT_Generator.sol';
 
-interface Dai {
-    function transfer(address dst, uint wad) external returns (bool);
-    function transferFrom( address sender, address recipient, uint256 amount) external returns (bool);
-    function balanceOf(address guy) external view returns (uint);
-}
 
 ///@title changeMakers create projects
 contract Projects is Sponsors, OwnableUpgradeable {
@@ -28,11 +24,15 @@ contract Projects is Sponsors, OwnableUpgradeable {
     uint256 id;
     uint256 fundingThreshold;
     uint256 currentFunding;
-    uint256 ninetyEightPercentFunding;
+    uint256 daiFunding;
+    uint256 usdcFunding;
+    uint256 changeMakerShare;
+    uint256 changeDaoShare;
     bool isFullyFunded;
     bool hasMinted;
-    bool hasWithdrawnNinetyEightPercent;
-    bool hasWithdrawnTwoPercent;
+    bool hasWithdrawnChangeMakerShare;
+    bool hasWithdrawnChangeDaoShare;
+    bool hasWithdrawnCommunityFundShare;
   }
 
   ///@notice References all of the project ids of a particular changeMaker
@@ -45,22 +45,33 @@ contract Projects is Sponsors, OwnableUpgradeable {
   CountersUpgradeable.Counter sponsorCount;
   CountersUpgradeable.Counter projectCount;
 
+  ///contract instances
   ChangeMakers changeMakers;
   ImpactNFT_Generator impactNFT_Generator;
-  Dai dai;
+  IERC20 dai;
+  IERC20 usdc;
+  ///share amounts for project funding; The sum of these must equal 100.
+  uint256 changeMakerPercentage;
+  uint256 changeDaoPercentage;
+  uint256 communityFundPercentage;
 
   ///@notice Upgradeable contracts cannot use constructors. Once the contract is deployed, this initialize function is called to set variables that would normally be set inside of a constructor.
   function initialize(
     ChangeMakers _changeMakers,
     ImpactNFT_Generator _impactNFT_Generator,
-    address daiAddress
+    address daiAddress,
+    address usdcAddress
   )
     public
     initializer
   {
     changeMakers = _changeMakers;
     impactNFT_Generator = _impactNFT_Generator;
-    dai = Dai(daiAddress);
+    dai = IERC20(daiAddress);
+    usdc = IERC20(usdcAddress);
+    changeMakerShare = 98;
+    changeDaoShare = 1;
+    communityFundShare = 1;
     ///In the non-upgradeable version of Ownable, the constuctor in the Ownable contract is automatically called when Projects is deployed.  But constructors cannot be used with the proxy pattern, so the Ownable's initialize() function must be called manually.
     __Ownable_init();
   }
@@ -87,11 +98,15 @@ contract Projects is Sponsors, OwnableUpgradeable {
       id: _currentProjectId,
       fundingThreshold: _fundingThreshold,
       currentFunding: 0,
-      ninetyEightPercentFunding: 0,
+      daiFunding: 0,
+      usdcFunding: 0,
+      changeMakerShare: 0,
+      changeDaoShare: 0,
       isFullyFunded: false,
       hasMinted: false,
-      hasWithdrawnNinetyEightPercent: false,
-      hasWithdrawnTwoPercent: false
+      hasWithdrawnChangeMakerShare: false,
+      hasWithdrawnChangeDaoShare: false,
+      hasWithdrawnCommunityFundShare: false
     });
 
     //Set the new project in the projectsIds mapping
@@ -104,7 +119,8 @@ contract Projects is Sponsors, OwnableUpgradeable {
   /*@dev The sponsor must give the Projects.sol contract approval to use dai.transferFrom() before calling this function by using dai.approve()*/
   function fundProject(
     uint256 _projectId,
-    uint256 _amount
+    uint256 _amount,
+    string memory _stablecoin
   )
     public
   {
@@ -114,7 +130,16 @@ contract Projects is Sponsors, OwnableUpgradeable {
     require(project.expirationTime > block.timestamp, "Funding period has ended");
     require(!project.isFullyFunded, "Project is already fully funded");
 
-    project.currentFunding += _amount;
+    ///currentFunding is stored with 18 decimal places.  USDC amounts need to be adjusted since they are stored with only 6.
+    if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
+      uint256 usdcAdjustedAmount;
+      usdcAdjustedAmount = _amount * 10**12;
+      project.currentFunding += usdcAdjustedAmount;
+      project.usdcFunding += usdcAdjustedAmount;
+    } else {
+      project.currentFunding += _amount;
+      project.daiFunding += _amount;
+    }
 
     if(project.currentFunding >= project.fundingThreshold) {
       project.isFullyFunded = true;
@@ -129,14 +154,21 @@ contract Projects is Sponsors, OwnableUpgradeable {
       sponsorAddress: msg.sender,
       projectId: _projectId,
       sponsorId: currentSponsorId,
-      sponsorFundingAmount: _amount
+      sponsorFundingAmount: _amount,
+      sponsorStablecoin: _stablecoin
     });
     ///The sponsor information gets stored
     projectSponsorIds[_projectId].push(currentSponsorId);
     sponsors[currentSponsorId] = newSponsor;
-    ///The sponsor's dai get transferred to this contract
-    dai.transferFrom(msg.sender, address(this), _amount);
 
+    ///Transfer the sponsor's stablecoin to Project.sol
+    if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("dai"))) {
+      ///The sponsor's DAI get transferred to the Projects.sol contract
+      dai.transferFrom(msg.sender, address(this), _amount);
+    } else if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
+      ///The sponsor's USDC get transferred to the Projects.sol contract
+      usdc.transferFrom(msg.sender, address(this), _amount);
+    }
   }
 
   ///@notice Retrieves the current funding for a specific project
@@ -198,8 +230,15 @@ contract Projects is Sponsors, OwnableUpgradeable {
     impactNFT_Generator.mintTokens(sponsorArray);
   }
 
-  /*@notice The changeMaker that created a specific project can withdraw 98% of its funding after minting tokens*/
-  function withdrawNinetyEightPercent(uint256 _projectId) public {
+  ///@notice Check that the percentage amounts are equal to 100.
+  modifier sharePercentagesEqualOneHundred {
+    require(changeMakerPercentage + changeDaoPercentage + communityFundPercentage == 100,
+      "The share percentages must have a sum of 100");
+    _;
+  }
+
+  /*@notice The changeMaker that created a specific project can withdraw its share of the funding after minting tokens*/
+  function withdrawChangemakerShare(uint256 _projectId) publicsharePercentagesEqualOneHundred {
     ///Security check
     Project storage project = projects[_projectId];
     require(project.hasMinted, "NFTs for this project have already been minted");
@@ -214,14 +253,34 @@ contract Projects is Sponsors, OwnableUpgradeable {
         isMsgSenderProjectOwner = true;
       }
     }
-    require(isMsgSenderProjectOwner, "Only the authorized changeMaker can call withdrawNinetyEightPercent()");
+    require(isMsgSenderProjectOwner, "Only the authorized changeMaker can call withdrawChangemakerShare()");
 
     ///Update state on the project to prevent funding from being withdrawn more than once
-    project.hasWithdrawnNinetyEightPercent = true;
+    project.hasWithdrawnChangeMakerShare = true;
     //Calculate 98% of final project funding
-    project.ninetyEightPercentFunding = project.currentFunding * 98 / 100;
+    project.changeMakerShare = project.currentFunding * changeMakerPercentage / 100;
     ///Transfer 98% of the project funding to the changeMaker that created this project
-    dai.transfer(msg.sender, project.ninetyEightPercentFunding);
+    dai.transfer(msg.sender, project.changeMakerShare);
+
+    uint256 changeMakerDaiShare = project.daiFunding * changeMakerPercentage / 100;
+    uint256 changeMakerUsdcShare = project.usdcFunding * changeMakerPercentage / 100 / 10**12;
+
+    project.changeDaoDaiShare = project.daiFunding * changeDaoPercentage / 100;
+    project.changeDaoUsdcShare = project.usdcFunding * changeDaoPercentage / 100 / 10**12;
+
+    project.communityFundDaiShare =
+      project.daiFunding - changeMakerDaiShare - project.changeDaoDaiShare;
+
+    project.communityFundUsdcShare =
+      (project.usdcFunding / 10**12) - changeMakerUsdcShare - project.changeDaoUsdcShare;
+
+    ///To save gas, check that amounts are greater than zero before attempting transfers
+    if (changeMakerDaiShare > 0) {
+      dai.transfer(msg.sender, changeMakerDaiShare);
+    }
+    if (changeMakerUsdcShare > 0) {
+      usdc.transfer(msg.sender, changeMakerUsdcShare);
+    }
   }
 
   ///@notice ChangeDAO can withdraw 2% of a project's funding after its tokens have been minted

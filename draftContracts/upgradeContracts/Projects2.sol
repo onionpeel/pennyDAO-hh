@@ -3,15 +3,11 @@ pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './ChangeMakers2.sol';
 import './Sponsors.sol';
 import './ImpactNFT_Generator2.sol';
 
-interface Dai {
-    function transfer(address dst, uint wad) external returns (bool);
-    function transferFrom( address sender, address recipient, uint256 amount) external returns (bool);
-    function balanceOf(address guy) external view returns (uint);
-}
 
 ///@title changeMakers create projects
 contract Projects2 is Sponsors, OwnableUpgradeable {
@@ -44,7 +40,8 @@ contract Projects2 is Sponsors, OwnableUpgradeable {
 
   ChangeMakers2 changeMakers;
   ImpactNFT_Generator2 impactNFT_Generator;
-  Dai dai;
+  IERC20 dai;
+  IERC20 usdc;
 
   ///@notice This is a new storage value that has been added to test upgradability
   uint256 public storageValue;
@@ -57,13 +54,15 @@ contract Projects2 is Sponsors, OwnableUpgradeable {
   function reInitialize(
     ChangeMakers2 _changeMakers,
     ImpactNFT_Generator2 _impactNFT_Generator,
-    address daiAddress
+    address daiAddress,
+    address usdcAddress
   )
     public
   {
     changeMakers = _changeMakers;
     impactNFT_Generator = _impactNFT_Generator;
-    dai = Dai(daiAddress);
+    dai = IERC20(daiAddress);
+    usdc = IERC20(usdcAddress);
   }
 
   ///@notice An authorized changeMaker calls this function to create a new project

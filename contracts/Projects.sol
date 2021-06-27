@@ -15,24 +15,56 @@ import './ImpactNFT_Generator.sol';
 ///@title changeMakers create projects
 contract Projects is Sponsors, OwnableUpgradeable {
   using CountersUpgradeable for CountersUpgradeable.Counter;
+
   ///This structure holds the data for a single project created by a changeMaker
+  // struct Project {
+  //   address changeMaker;
+  //   string name;
+  //   uint256 expirationTime;
+  //   uint256 id;
+  //   uint256 fundingThreshold;
+  //   uint256 currentFunding;
+  //   uint256 daiFunding;
+  //   uint256 usdcFunding;
+  //   bool isFullyFunded;
+  //   bool hasMinted;
+  //   bool hasWithdrawnChangeMakerShare;
+  //   bool hasWithdrawnChangeDaoShare;
+  //   bool hasWithdrawnCommunityFundShare;
+  // }
+
   struct Project {
     address changeMaker;
     string name;
-    uint256 creationTime;
     uint256 expirationTime;
     uint256 id;
+    bool hasMinted;
+    ProjectFunding projectFunding;
+  }
+
+  struct ProjectFunding {
     uint256 fundingThreshold;
     uint256 currentFunding;
-    uint256 daiFunding;
-    uint256 usdcFunding;
-    uint256 changeMakerShare;
-    uint256 changeDaoShare;
     bool isFullyFunded;
-    bool hasMinted;
     bool hasWithdrawnChangeMakerShare;
     bool hasWithdrawnChangeDaoShare;
     bool hasWithdrawnCommunityFundShare;
+    DAIFunding daiFunding;
+    USDCFunding usdcFunding;
+  }
+
+  struct DAIFunding {
+    uint256 daiFundingAmount;
+    uint256 changeMakerDaiShare;
+    uint256 changeDaoDaiShare;
+    uint256 communityFundDaiShare;
+  }
+
+  struct USDCFunding {
+    uint256 usdcFundingAmount;
+    uint256 changeMakerUsdcShare;
+    uint256 changeDaoUsdcShare;
+    uint256 communityFundUsdcShare;
   }
 
   ///@notice References all of the project ids of a particular changeMaker
@@ -69,9 +101,9 @@ contract Projects is Sponsors, OwnableUpgradeable {
     impactNFT_Generator = _impactNFT_Generator;
     dai = IERC20(daiAddress);
     usdc = IERC20(usdcAddress);
-    changeMakerShare = 98;
-    changeDaoShare = 1;
-    communityFundShare = 1;
+    changeMakerPercentage = 98;
+    changeDaoPercentage = 1;
+    communityFundPercentage = 1;
     ///In the non-upgradeable version of Ownable, the constuctor in the Ownable contract is automatically called when Projects is deployed.  But constructors cannot be used with the proxy pattern, so the Ownable's initialize() function must be called manually.
     __Ownable_init();
   }
@@ -90,27 +122,49 @@ contract Projects is Sponsors, OwnableUpgradeable {
     uint256 _currentProjectId = projectCount.current();
 
     //Create a new struct for this project based off of changeMaker's input
-    Project memory newProject = Project({
-      changeMaker: msg.sender,
-      name: _name,
-      creationTime: block.timestamp,
-      expirationTime: _expirationTime,
-      id: _currentProjectId,
-      fundingThreshold: _fundingThreshold,
-      currentFunding: 0,
-      daiFunding: 0,
-      usdcFunding: 0,
-      changeMakerShare: 0,
-      changeDaoShare: 0,
-      isFullyFunded: false,
-      hasMinted: false,
-      hasWithdrawnChangeMakerShare: false,
-      hasWithdrawnChangeDaoShare: false,
-      hasWithdrawnCommunityFundShare: false
-    });
+    // Project memory newProject = Project({
+    //   changeMaker: msg.sender,
+    //   // name: _name,
+    //   // creationTime: block.timestamp,
+    //   expirationTime: _expirationTime,
+    //   id: _currentProjectId,
+    //   fundingThreshold: _fundingThreshold,
+    //   currentFunding: 0,
+    //   daiFunding: 0,
+    //   usdcFunding: 0,
+    //   isFullyFunded: false,
+    //   hasMinted: false,
+    //   hasWithdrawnChangeMakerShare: false,
+    //   hasWithdrawnChangeDaoShare: false,
+    //   hasWithdrawnCommunityFundShare: false
+    // });
+
+    ///Create a new struct containing information about this project based off of changeMaker's input
+    // Project memory newProject;
+    // newProject.changeMaker = msg.sender;
+    // newProject.name = _name;
+    // newProject.expirationTime = _expirationTime;
+    // newProject.id = _currentProjectId;
+    //
+    // ///Create a struct for this project containing funding information
+    // Funding memory funding;
+    // funding.id = _currentProjectId;
+    // funding.fundingThreshold = _fundingThreshold;
+
+    //Create a new struct for this project based off of changeMaker's input
+    Project memory newProject;
+    newProject.changeMaker = msg.sender;
+    newProject.name = _name;
+    newProject.expirationTime = _expirationTime;
+    newProject.id = _currentProjectId;
+    newProject.projectFunding.fundingThreshold = _fundingThreshold;
+
+
 
     //Set the new project in the projectsIds mapping
     projects[_currentProjectId] = newProject;
+
+
     //Add the new project's id to the changeMaker's changeMakerProjects array
     changeMakerProjects[msg.sender].push(_currentProjectId);
   }
@@ -128,21 +182,21 @@ contract Projects is Sponsors, OwnableUpgradeable {
     Project storage project = projects[_projectId];
 
     require(project.expirationTime > block.timestamp, "Funding period has ended");
-    require(!project.isFullyFunded, "Project is already fully funded");
+    require(!project.projectFunding.isFullyFunded, "Project is already fully funded");
 
     ///currentFunding is stored with 18 decimal places.  USDC amounts need to be adjusted since they are stored with only 6.
     if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
       uint256 usdcAdjustedAmount;
       usdcAdjustedAmount = _amount * 10**12;
-      project.currentFunding += usdcAdjustedAmount;
-      project.usdcFunding += usdcAdjustedAmount;
+      project.projectFunding.currentFunding += usdcAdjustedAmount;
+      project.projectFunding.usdcFunding.usdcFundingAmount += usdcAdjustedAmount;
     } else {
-      project.currentFunding += _amount;
-      project.daiFunding += _amount;
+      project.projectFunding.currentFunding += _amount;
+      project.projectFunding.daiFunding.daiFundingAmount += _amount;
     }
 
-    if(project.currentFunding >= project.fundingThreshold) {
-      project.isFullyFunded = true;
+    if(project.projectFunding.currentFunding >= project.projectFunding.fundingThreshold) {
+      project.projectFunding.isFullyFunded = true;
     }
 
     sponsorCount.increment();
@@ -174,13 +228,13 @@ contract Projects is Sponsors, OwnableUpgradeable {
   ///@notice Retrieves the current funding for a specific project
   function currentProjectFunding(uint256 _projectId) public view returns (uint256) {
     Project storage project = projects[_projectId];
-    return project.currentFunding;
+    return project.projectFunding.currentFunding;
   }
 
   ///@notice Returns bool based on a project's isFullyFunded property
   function isProjectFullyFunded(uint256 _projectId) public view returns (bool) {
     Project storage project = projects[_projectId];
-    return project.isFullyFunded;
+    return project.projectFunding.isFullyFunded;
   }
 
   /*@notice Returns an array of projects from the changeMakerProjects mapping belonging to a specific changeMaker*/
@@ -188,22 +242,22 @@ contract Projects is Sponsors, OwnableUpgradeable {
     return changeMakerProjects[_changeMaker];
   }
 
-  ///@notice Returns an array from the projectsSponsorIds mapping
+  // ///@notice Returns an array from the projectsSponsorIds mapping
   function getProjectSponsorIds(uint256 _projectId) public view returns (uint256[] memory) {
     return projectSponsorIds[_projectId];
   }
 
   ///@notice ChangeDao can return funds to sponsors of a specific project in extraordinary circumstances
-  function returnFundsToAllSponsors(uint256 _projectId) public onlyOwner {
-    Project storage project = projects[_projectId];
-    require(project.currentFunding > 0, "Project has no funds to return");
-
-    uint256[] memory _projectSponsorIds = projectSponsorIds[_projectId];
-    for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
-      Sponsor memory sponsor = sponsors[i + 1];
-      dai.transfer(sponsor.sponsorAddress, sponsor.sponsorFundingAmount);
-    }
-  }
+  // function returnFundsToAllSponsors(uint256 _projectId) public onlyOwner {
+  //   Project storage project = projects[_projectId];
+  //   require(project.currentFunding > 0, "Project has no funds to return");
+  //
+  //   uint256[] memory _projectSponsorIds = projectSponsorIds[_projectId];
+  //   for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
+  //     Sponsor memory sponsor = sponsors[i + 1];
+  //     dai.transfer(sponsor.sponsorAddress, sponsor.sponsorFundingAmount);
+  //   }
+  // }
 
   /*@notice The changeMaker reponsible for a given project calls this function when the project is fully funded*/
   function createTokens(
@@ -224,26 +278,43 @@ contract Projects is Sponsors, OwnableUpgradeable {
     ///security checks for the project; prevent re-minting by setting hasMinted to true
     Project storage project = projects[_projectId];
     require(!project.hasMinted, "NFTs for this project have already been minted");
-    require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    require(project.projectFunding.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
     project.hasMinted = true;
     ///mint the NFT
     impactNFT_Generator.mintTokens(sponsorArray);
   }
 
+
+  ///@notice ChangeDAO can change the percentage of project funding that goes to the changeMaker
+  function adjustChangeMakerPercentage(uint256 _newPercentage) public onlyOwner {
+    changeMakerPercentage = _newPercentage;
+  }
+
+  ///@notice ChangeDAO can change the percentage of project funding that goes to ChangeDAO
+  function adjustChangeDaoPercentage(uint256 _newPercentage) public onlyOwner {
+    changeDaoPercentage = _newPercentage;
+  }
+
+  ///@notice ChangeDAO can change the percentage of project funding that goes to the community fund
+  function adjustCommunityFundPercentage(uint256 _newPercentage) public onlyOwner {
+    communityFundPercentage = _newPercentage;
+  }
+
   ///@notice Check that the percentage amounts are equal to 100.
-  modifier sharePercentagesEqualOneHundred {
-    require(changeMakerPercentage + changeDaoPercentage + communityFundPercentage == 100,
-      "The share percentages must have a sum of 100");
-    _;
+  function sharePercentagesEqualOneHundred() public view returns (bool) {
+    return changeMakerPercentage + changeDaoPercentage + communityFundPercentage == 100;
   }
 
   /*@notice The changeMaker that created a specific project can withdraw its share of the funding after minting tokens*/
-  function withdrawChangemakerShare(uint256 _projectId) publicsharePercentagesEqualOneHundred {
+  function withdrawChangemakerShare(uint256 _projectId) public {
+    ///Check that percentage distributions equal 100
+    require(sharePercentagesEqualOneHundred(), "Percentage distributions do not equal 100");
     ///Security check
     Project storage project = projects[_projectId];
     require(project.hasMinted, "NFTs for this project have already been minted");
-    require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
-    require(!project.hasWithdrawnNinetyEightPercent, "The 98% of project funding has already been withdrawn");
+    require(project.projectFunding.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    require(!project.projectFunding.hasWithdrawnChangeMakerShare,
+      "The changeMaker funding has already been withdrawn");
 
     ///check that only the changeMaker responsible for this specific project is calling this function
     bool isMsgSenderProjectOwner;
@@ -256,46 +327,78 @@ contract Projects is Sponsors, OwnableUpgradeable {
     require(isMsgSenderProjectOwner, "Only the authorized changeMaker can call withdrawChangemakerShare()");
 
     ///Update state on the project to prevent funding from being withdrawn more than once
-    project.hasWithdrawnChangeMakerShare = true;
-    //Calculate 98% of final project funding
-    project.changeMakerShare = project.currentFunding * changeMakerPercentage / 100;
-    ///Transfer 98% of the project funding to the changeMaker that created this project
-    dai.transfer(msg.sender, project.changeMakerShare);
+    project.projectFunding.hasWithdrawnChangeMakerShare = true;
 
-    uint256 changeMakerDaiShare = project.daiFunding * changeMakerPercentage / 100;
-    uint256 changeMakerUsdcShare = project.usdcFunding * changeMakerPercentage / 100 / 10**12;
-
-    project.changeDaoDaiShare = project.daiFunding * changeDaoPercentage / 100;
-    project.changeDaoUsdcShare = project.usdcFunding * changeDaoPercentage / 100 / 10**12;
-
-    project.communityFundDaiShare =
-      project.daiFunding - changeMakerDaiShare - project.changeDaoDaiShare;
-
-    project.communityFundUsdcShare =
-      (project.usdcFunding / 10**12) - changeMakerUsdcShare - project.changeDaoUsdcShare;
+    ///Set the amount of DAI and USDC the changeMaker will receive from this project
+    project.projectFunding.daiFunding.changeMakerDaiShare =
+      project.projectFunding.daiFunding.daiFundingAmount * changeMakerPercentage / 100;
+    project.projectFunding.usdcFunding.changeMakerUsdcShare =
+      project.projectFunding.usdcFunding.usdcFundingAmount * changeMakerPercentage / 100 / 10**12;
+    ///Set the amount of DAI and USDC ChangeDAO will receive from this project
+    project.projectFunding.daiFunding.changeDaoDaiShare =
+      project.projectFunding.daiFunding.daiFundingAmount * changeDaoPercentage / 100;
+    project.projectFunding.usdcFunding.changeDaoUsdcShare =
+      project.projectFunding.usdcFunding.usdcFundingAmount * changeDaoPercentage / 100 / 10**12;
+    ///Set the amount of DAI and USDC the community fund will receive from this project
+    project.projectFunding.daiFunding.communityFundDaiShare =
+      project.projectFunding.daiFunding.daiFundingAmount -
+      project.projectFunding.daiFunding.changeMakerDaiShare -
+      project.projectFunding.daiFunding.changeDaoDaiShare;
+    project.projectFunding.usdcFunding.communityFundUsdcShare =
+      (project.projectFunding.usdcFunding.usdcFundingAmount / 10**12) -
+      project.projectFunding.usdcFunding.changeMakerUsdcShare -
+      project.projectFunding.usdcFunding.changeDaoUsdcShare;
 
     ///To save gas, check that amounts are greater than zero before attempting transfers
-    if (changeMakerDaiShare > 0) {
-      dai.transfer(msg.sender, changeMakerDaiShare);
+    if (project.projectFunding.daiFunding.changeMakerDaiShare > 0) {
+      dai.transfer(msg.sender, project.projectFunding.daiFunding.changeMakerDaiShare);
     }
-    if (changeMakerUsdcShare > 0) {
-      usdc.transfer(msg.sender, changeMakerUsdcShare);
+    if (project.projectFunding.usdcFunding.changeMakerUsdcShare > 0) {
+      usdc.transfer(msg.sender, project.projectFunding.usdcFunding.changeMakerUsdcShare);
     }
   }
 
-  ///@notice ChangeDAO can withdraw 2% of a project's funding after its tokens have been minted
-  function withdrawTwoPercent(uint256 _projectId) public onlyOwner {
+  ///@notice ChangeDAO can withdraw set percentage of a project's funding after its tokens have been minted
+  ///@notice This function will only send funds to ChangeDAO after the changeMaker has called withdrawChangemakerShare() for this project
+  function withdrawChangeDaoShare(uint256 _projectId) public onlyOwner {
     //Security check
     Project storage project = projects[_projectId];
     require(project.hasMinted, "NFTs for this project have already been minted");
-    require(project.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
-    require(!project.hasWithdrawnTwoPercent, "2% has already been withdrawn from this project");
+    require(project.projectFunding.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    require(!project.projectFunding.hasWithdrawnChangeDaoShare,
+      "ChangeDAO share has already been withdrawn from this project");
 
-    ///Change state of the project to prevent 2% from being withdrawn more than once
-    project.hasWithdrawnTwoPercent = true;
-    ///Calculate 2% of the received funding for this project
-    uint256 twoPercent = project.currentFunding - (project.currentFunding * 98 / 100);
-    ///Transfer the 2% to changeDAO
-    dai.transfer(msg.sender, twoPercent);
+    project.projectFunding.hasWithdrawnChangeDaoShare = true;
+
+    ///To save gas, check that amounts are greater than zero before attempting transfers
+    if (project.projectFunding.daiFunding.changeDaoDaiShare > 0) {
+      dai.transfer(msg.sender, project.projectFunding.daiFunding.changeDaoDaiShare);
+    }
+    if (project.projectFunding.usdcFunding.changeDaoUsdcShare > 0) {
+      usdc.transfer(msg.sender, project.projectFunding.usdcFunding.changeDaoUsdcShare);
+    }
+  }
+
+
+  ///!!!!!!!!!!!!!!!!THE PERMISSION NEEDS TO BE SET SO ONLY THE COMMUNITY FUND ADDRESS CAN CALL THIS FUNCTION
+  ///@notice The community fund can withdraw set percentage of a project's funding after its tokens have been minted
+  ///@notice This function will only send funds to the community fund after the changeMaker has called withdrawChangemakerShare() for this project
+  function withdrawCommunityFundShare(uint256 _projectId) public  {
+    //Security check
+    Project storage project = projects[_projectId];
+    require(project.hasMinted, "NFTs for this project have already been minted");
+    require(project.projectFunding.isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    require(!project.projectFunding.hasWithdrawnCommunityFundShare,
+      "ChangeDAO share has already been withdrawn from this project");
+
+    project.projectFunding.hasWithdrawnCommunityFundShare = true;
+
+    ///To save gas, check that amounts are greater than zero before attempting transfers
+    if (project.projectFunding.daiFunding.communityFundDaiShare > 0) {
+      dai.transfer(msg.sender, project.projectFunding.daiFunding.communityFundDaiShare);
+    }
+    if (project.projectFunding.usdcFunding.communityFundUsdcShare > 0) {
+      usdc.transfer(msg.sender, project.projectFunding.usdcFunding.communityFundUsdcShare);
+    }
   }
 }

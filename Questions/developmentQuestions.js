@@ -43,3 +43,5 @@ https://docs.openzeppelin.com/contracts/4.x/api/access
         }
     }
 https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable
+
+17. A wallet address for the community fund needs to be created and then this needs to be set as a permission in Projects: withdrawCommunityFundShare()

@@ -248,16 +248,24 @@ contract Projects is Sponsors, OwnableUpgradeable {
   }
 
   ///@notice ChangeDao can return funds to sponsors of a specific project in extraordinary circumstances
-  // function returnFundsToAllSponsors(uint256 _projectId) public onlyOwner {
-  //   Project storage project = projects[_projectId];
-  //   require(project.currentFunding > 0, "Project has no funds to return");
-  //
-  //   uint256[] memory _projectSponsorIds = projectSponsorIds[_projectId];
-  //   for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
-  //     Sponsor memory sponsor = sponsors[i + 1];
-  //     dai.transfer(sponsor.sponsorAddress, sponsor.sponsorFundingAmount);
-  //   }
-  // }
+  function returnFundsToAllSponsors(uint256 _projectId) public onlyOwner {
+    Project storage project = projects[_projectId];
+    require(project.projectFunding.currentFunding > 0, "Project has no funds to return");
+
+    uint256[] memory _projectSponsorIds = projectSponsorIds[_projectId];
+    for(uint256 i = 0; i < _projectSponsorIds.length; i++) {
+      Sponsor memory sponsor = sponsors[i + 1];
+
+      if(keccak256(abi.encodePacked(sponsor.sponsorStablecoin)) == keccak256(abi.encodePacked("dai"))) {
+        ///The sponsor's DAI gets returned to the sponsor
+        dai.transfer(sponsor.sponsorAddress, sponsor.sponsorFundingAmount);
+      } else if(keccak256(abi.encodePacked(sponsor.sponsorStablecoin)) ==
+          keccak256(abi.encodePacked("usdc"))) {
+        ///The sponsor's USDC gets returned to the sponsor
+        usdc.transfer(sponsor.sponsorAddress, sponsor.sponsorFundingAmount);
+      }
+    }
+  }
 
   /*@notice The changeMaker reponsible for a given project calls this function when the project is fully funded*/
   function createTokens(

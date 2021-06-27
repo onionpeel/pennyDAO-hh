@@ -7,7 +7,7 @@
       "hash": "0x3769b2c5208b943d2f3655f9d9944ff169d90ea426929c17e3598634daa06e53",
       "type": 0,
       "accessList": null,
-      "blockHash": "0x89ae06e456e5bf728b3442b97d8822921fed3f778e2277045b528f5a95bbfa14",
+      "blockHash": "0x41fb0ac485c4f24547f28cb102f6e54920de3d673432132a09979f50ed56b87c",
       "blockNumber": 12615002,
       "transactionIndex": 0,
       "confirmations": 1,
@@ -52,7 +52,7 @@
     },
     {
       "address": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
-      "txHash": "0xa041cc57ea07d147aee590bb501ada7149c3d0bfc35021dc4f02f36bee0c0997",
+      "txHash": "0xa6f034ab8f967928bd10492becc91775f891264bd2f4fd9ee5ce28d5207cbc25",
       "kind": "transparent"
     }
   ],
@@ -149,7 +149,7 @@
           {
             "contract": "Sponsors",
             "label": "sponsors",
-            "type": "t_mapping(t_uint256,t_struct(Sponsor)3529_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Sponsor)3634_storage)",
             "src": "contracts\\Sponsors.sol:30"
           },
           {
@@ -187,10 +187,10 @@
           "t_array(t_uint256)dyn_storage": {
             "label": "uint256[]"
           },
-          "t_mapping(t_uint256,t_struct(Sponsor)3529_storage)": {
+          "t_mapping(t_uint256,t_struct(Sponsor)3634_storage)": {
             "label": "mapping(uint256 => struct Sponsors.Sponsor)"
           },
-          "t_struct(Sponsor)3529_storage": {
+          "t_struct(Sponsor)3634_storage": {
             "label": "struct Sponsors.Sponsor",
             "members": [
               {
@@ -918,9 +918,9 @@
         }
       }
     },
-    "090aa477d5eedee46744e13c0b63ace5f670246a6d8068ebc8ae72b006a5fc6b": {
+    "c732a309a74522d94b02f4ebef8d984ef478ce00f8f52f5aa0b55a7b0d473e01": {
       "address": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
-      "txHash": "0x87b7a5f12ca86fdcd5b8eef1c066b888d4e5be9651d07a1ce8dbf081c81e657e",
+      "txHash": "0xe3319503603a19b9d8553069a5c2c3a18a4b3d6b33cd09c0e96eed0be21990e2",
       "layout": {
         "storage": [
           {
@@ -932,7 +932,7 @@
           {
             "contract": "Sponsors",
             "label": "sponsors",
-            "type": "t_mapping(t_uint256,t_struct(Sponsor)3529_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Sponsor)3634_storage)",
             "src": "contracts\\Sponsors.sol:30"
           },
           {
@@ -1201,10 +1201,10 @@
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]"
           },
-          "t_mapping(t_uint256,t_struct(Sponsor)3529_storage)": {
+          "t_mapping(t_uint256,t_struct(Sponsor)3634_storage)": {
             "label": "mapping(uint256 => struct Sponsors.Sponsor)"
           },
-          "t_struct(Sponsor)3529_storage": {
+          "t_struct(Sponsor)3634_storage": {
             "label": "struct Sponsors.Sponsor",
             "members": [
               {

@@ -178,7 +178,7 @@ describe('donation', () => {
 
     await hre.network.provider.request({
       method: "hardhat_stopImpersonatingAccount",
-      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
+      params: ["0x2b6f908bf9082ad39adb27c04e88adfec8f58110"]}
     );
   });
 
@@ -324,5 +324,71 @@ describe('donation', () => {
     // expect(ethers.utils.formatEther(changeDAOBalance)).to.equal('3.0');
   });
 
-  
+  it('Donation: donate DAI with donateStablecoins()', async () => {
+    let amount = ethers.utils.parseEther('1000');
+
+    //impersonate externally owned account found on etherscan (this is Binance8)
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
+    );
+    let eoa = await ethers.provider.getSigner("0xf977814e90da44bfa03b6295a0616a897441acec");
+
+    let daiContractInstance = daiContract.connect(eoa);
+    let eoaDoncation = donation.connect(eoa);
+
+    await daiContractInstance.approve(donation.address, amount);
+    //eoa donates DAI to Donation.sol
+    await eoaDoncation.donateStablecoins("dai", amount);
+
+    let donationBalance = await daiContract.balanceOf(donation.address);
+    // console.log(ethers.utils.formatEther(donationBalance));
+    expect(ethers.utils.formatEther(donationBalance)).to.equal('1000.0');
+
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
+    );
+  });
+
+  it('Donation: donate USDC with donateStablecoins()', async () => {
+    let amount = ethers.utils.parseUnits('1000', 6);
+
+    //impersonate externally owned account found on etherscan
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: ["0x2b6f908bf9082ad39adb27c04e88adfec8f58110"]}
+    );
+
+    let eoa = await ethers.provider.getSigner("0x2b6f908bf9082ad39adb27c04e88adfec8f58110");
+
+    let usdcContractInstance = usdcContract.connect(eoa);
+    let eoaDoncation = donation.connect(eoa);
+
+    await usdcContractInstance.approve(donation.address, amount);
+    //eoa donates DAI to Donation.sol
+    await eoaDoncation.donateStablecoins("usdc", amount);
+
+    let donationBalance = await usdcContract.balanceOf(donation.address);
+    // console.log(ethers.utils.formatUnits(donationBalance, 6));
+    expect(ethers.utils.formatUnits(donationBalance, 6)).to.equal('1000.0');
+
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: ["0x2b6f908bf9082ad39adb27c04e88adfec8f58110"]}
+    );
+  });
+
+  it('Donation: changeDAO withdraws all stablecoins with withdrawStablecoins()', async () => {
+    let changeDAODonation = donation.connect(changeDAO);
+    await changeDAODonation.withdrawStablecoins();
+
+    let changeDAODaiBalance = await daiContract.balanceOf(changeDAO.address);
+    // console.log(ethers.utils.formatEther(changeDAODaiBalance));
+    expect(ethers.utils.formatEther(changeDAODaiBalance)).to.equal('1007.0');
+
+    let changeDAOUsdcBalance = await usdcContract.balanceOf(changeDAO.address);
+    // console.log(ethers.utils.formatUnits(changeDAOUsdcBalance, 6));
+    expect(ethers.utils.formatUnits(changeDAOUsdcBalance, 6)).to.equal('1003.0');
+  });
 });

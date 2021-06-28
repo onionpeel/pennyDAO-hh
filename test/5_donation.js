@@ -1,10 +1,10 @@
 const { expect } = require('chai');
 const { upgrades } = require("hardhat");
 
-xdescribe('stablecoins_percentageSetters', () => {
+describe('donation', () => {
   // contract instances
   let sponsors, changeMakers, changeMakers2, impactNFT_Generator, impactNFT_Generator2,
-    projects, projects2;
+    projects, projects2, donation;
   let changeDAO, organization1, organization2, sponsor1, sponsor2, communityFund; //externally owned accounts
   let arrayOfDataForMintingNFTs; //data passed into Projects: createTokens()
   let daiContract, usdcContract;
@@ -38,19 +38,19 @@ xdescribe('stablecoins_percentageSetters', () => {
     ];
   });
 
-  it('Deploys ChangeMakers, ImpactNFT_Generator, Projects contracts', async () => {
+  it('Deploys ChangeMakers, ImpactNFT_Generator, Projects, Donation contracts', async () => {
       ChangeMakers = await hre.ethers.getContractFactory('ChangeMakers');
       changeMakers = await upgrades.deployProxy(
         ChangeMakers,
         [],
-        { initializer: 'initialize'}
+        { initializer: 'initialize' }
       );
 
       ImpactNFT_Generator = await hre.ethers.getContractFactory('ImpactNFT_Generator');
       impactNFT_Generator = await upgrades.deployProxy(
         ImpactNFT_Generator,
         ['Proof of Impact', 'IMPACT'],
-        { initializer: 'initialize'}
+        { initializer: 'initialize' }
       );
 
       const daiAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -60,11 +60,18 @@ xdescribe('stablecoins_percentageSetters', () => {
       projects = await upgrades.deployProxy(
           Projects,
           [changeMakers.address, impactNFT_Generator.address, daiAddress, usdcAddress],
-          { initializer: 'initialize'}
+          { initializer: 'initialize' }
       );
 
       daiContract = await ethers.getContractAt('IERC20', daiAddress);
       usdcContract = await ethers.getContractAt('IERC20', usdcAddress);
+
+      Donation = await hre.ethers.getContractFactory('Donation');
+      donation = await upgrades.deployProxy(
+        Donation,
+        [daiAddress, usdcAddress, changeDAO.address],
+        { initializer: 'initialize' }
+      );
   });
 
   it('ChangeMakers: becomeChangeMaker()', async () => {
@@ -228,40 +235,30 @@ xdescribe('stablecoins_percentageSetters', () => {
     expect(ownerNFT2).to.equal(sponsor2.address);
   });
 
-  it("Projects: ChangeDAO sets new percentage distribution that exceeds 100", async () => {
-      changeDAOProject = projects.connect(changeDAO);
-      await changeDAOProject.adjustChangeDaoPercentage(5);
-      expect(await changeDAOProject.sharePercentagesEqualOneHundred()).to.equal(false);
-
-      await changeDAOProject.adjustChangeMakerPercentage(92);
-      await changeDAOProject.adjustCommunityFundPercentage(3);
-      expect(await changeDAOProject.sharePercentagesEqualOneHundred()).to.equal(true);
-  });
-
   it('Projects: changeMaker calls withdrawChangemakerShare() and gets set percentage of funding',
     async () => {
       let organization1Project = projects.connect(organization1);
-      //changeMaker calls function to receive project funding (currently based on 92%)
+      //changeMaker calls function to receive project funding (currently based on 98%)
       await organization1Project.withdrawChangemakerShare(ethers.BigNumber.from('2'));
       let organization1DaiBalance = await daiContract.balanceOf(organization1.address);
       // console.log(ethers.utils.formatEther(organization1DaiBalance))
-      expect(ethers.utils.formatEther(organization1DaiBalance)).to.equal('644.0');
+      expect(ethers.utils.formatEther(organization1DaiBalance)).to.equal('686.0');
       let organization1UsdcBalance = await usdcContract.balanceOf(organization1.address);
       // console.log(ethers.utils.formatUnits(organization1UsdcBalance, 6))
-      expect(ethers.utils.formatUnits(organization1UsdcBalance, 6)).to.equal('276.0');
+      expect(ethers.utils.formatUnits(organization1UsdcBalance, 6)).to.equal('294.0');
   });
 
   it('Projects: ChangeDAO calls withdrawChangeDaoShare() and gets set percentage of funding',
     async () => {
       let changeDAOProject = projects.connect(changeDAO);
-      //changeDAO calls function to receive project funding (currently based on 5%)
+      //changeDAO calls function to receive project funding (currently based on 1%)
       await changeDAOProject.withdrawChangeDaoShare(ethers.BigNumber.from('2'));
       let changeDAODaiBalance = await daiContract.balanceOf(changeDAO.address);
       // console.log(ethers.utils.formatEther(changeDAODaiBalance))
-      expect(ethers.utils.formatEther(changeDAODaiBalance)).to.equal('35.0');
+      expect(ethers.utils.formatEther(changeDAODaiBalance)).to.equal('7.0');
       let changeDAOUsdcBalance = await usdcContract.balanceOf(changeDAO.address);
       // console.log(ethers.utils.formatUnits(changeDAOUsdcBalance, 6))
-      expect(ethers.utils.formatUnits(changeDAOUsdcBalance, 6)).to.equal('15.0');
+      expect(ethers.utils.formatUnits(changeDAOUsdcBalance, 6)).to.equal('3.0');
 
       // let projectsDaiBalance = await daiContract.balanceOf(projects.address);
       // console.log(ethers.utils.formatEther(projectsDaiBalance));
@@ -270,14 +267,14 @@ xdescribe('stablecoins_percentageSetters', () => {
   it('Projects: ChangeDAO calls withdrawCommunityFundShare() and gets set percentage of funding',
     async () => {
       let communityFundProject = projects.connect(communityFund);
-      //communityFund calls function to receive project funding (currently based on 2%)
+      //communityFund calls function to receive project funding (currently based on 1%)
       await communityFundProject.withdrawCommunityFundShare(ethers.BigNumber.from('2'));
       let communityFundDaiBalance = await daiContract.balanceOf(communityFund.address);
       // console.log(ethers.utils.formatEther(communityFundDaiBalance))
-      expect(ethers.utils.formatEther(communityFundDaiBalance)).to.equal('21.0');
+      expect(ethers.utils.formatEther(communityFundDaiBalance)).to.equal('7.0');
       let communityFundUsdcBalance = await usdcContract.balanceOf(communityFund.address);
       // console.log(ethers.utils.formatUnits(communityFundUsdcBalance, 6))
-      expect(ethers.utils.formatUnits(communityFundUsdcBalance, 6)).to.equal('9.0');
+      expect(ethers.utils.formatUnits(communityFundUsdcBalance, 6)).to.equal('3.0');
 
       let projectsDaiBalance = await daiContract.balanceOf(projects.address);
       // console.log(ethers.utils.formatEther(projectsDaiBalance));
@@ -288,4 +285,44 @@ xdescribe('stablecoins_percentageSetters', () => {
       expect(ethers.utils.formatUnits(projectsUsdcBalance, 6)).to.equal('0.0');
   });
 
+  it('Donation: Send Ether to contract', async () => {
+    let donationBalance = await ethers.provider.getBalance(donation.address);
+    // console.log(ethers.utils.formatEther(donationBalance));
+    expect(ethers.utils.formatEther(donationBalance)).to.equal('0.0');
+    //impersonate externally owned account found on etherscan (this is Binance8)
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
+    );
+    let eoa = await ethers.provider.getSigner("0xf977814e90da44bfa03b6295a0616a897441acec");
+    await eoa.sendTransaction({
+      to: donation.address,
+      value: ethers.utils.parseEther('3.0')
+    });
+
+    donationBalance = await ethers.provider.getBalance(donation.address);
+    // console.log(ethers.utils.formatEther(donationBalance));
+    expect(ethers.utils.formatEther(donationBalance)).to.equal('3.0');
+
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: ["0xf977814e90da44bfa03b6295a0616a897441acec"]}
+    );
+  });
+
+  it('Donation: ChangeDAO withdraws ETH from contract', async () => {
+    let changeDAODonation = donation.connect(changeDAO);
+    await changeDAODonation.withdrawETH();
+
+    let donationBalance = await ethers.provider.getBalance(donation.address);
+    // console.log(ethers.utils.formatEther(donationBalance));
+    expect(ethers.utils.formatEther(donationBalance)).to.equal('0.0');
+
+    let changeDAOBalance = await ethers.provider.getBalance(changeDAO.address);
+    // console.log(ethers.utils.formatEther(changeDAOBalance));
+    //This test needs to account for the gas cost that changeDAO pays.  The final value will be 3.0 - gas cost
+    // expect(ethers.utils.formatEther(changeDAOBalance)).to.equal('3.0');
+  });
+
+  
 });

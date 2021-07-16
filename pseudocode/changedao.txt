@@ -1,0 +1,2 @@
+approvedChangemakers
+@dev Maintains a list of addresses that are permitted to register as changemakers

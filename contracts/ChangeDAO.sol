@@ -3,15 +3,61 @@ pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./ChangeMaker.sol";
 
-contract ChangeDAO is Ownable{
+contract ChangeDAO is ERC721, Ownable {
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) approvedChangeMakers;
 
   /// @notice The contract owner grants approval to become a changemaker
   /// @dev Only the contract owner can call this function
-  /// @param
-  function approveNewChangeMaker(address newChangeMaker) external onlyOwner {
+  /// @param newChangeMaker The address that will be added to the mapping of approved changemakers
+  function approveNewChangeMaker(address newChangeMaker) public onlyOwner {
     approvedChangeMakers[newChangeMaker] = true;
+  }
+
+  /// @notice Check if an address has been approved as a changeMaker
+  /// @param changeMaker Address to be checked for approval status
+  /// @return true = approved
+  function checkChangeMakerApproval(address changeMaker) public view returns (bool) {
+    return approvedChangeMakers[changeMaker];
+  }
+
+  /// @notice The contract owner removes a changemaker's approval status
+  /// @param changeMaker Address to be set to false in approvedChangeMakers mapping
+  function removeApproval(address changeMaker) public onlyOwner {
+    approvedChangeMakers[changeMaker] = false;
+  }
+
+
+
+  using Counters for Counters.Counter;
+  Counters.Counter public changeMakerTokenId;
+  address immutable changeMakerImplementation;
+  mapping (uint256 => address) public changeMakerTokenIdToChangeMakerContract;
+
+  // constructor() ERC721('ChangeDAO', 'CHD') {
+  //   changeMakerImplementation = address(new ChangeMaker());
+  // }
+
+  constructor() {
+    changeMakerImplementation = address(new ChangeMaker());
+  }
+
+  function register() public {
+    require(approvedChangeMakers[msg.sender] == true,
+      "ChangeMaker needs to be approved in order to register");
+
+    address clone = Clones.clone(changeMakerImplementation);
+
+    changeMakerTokenId.increment();
+    uint256 currentToken = changeMakerTokenId.current();
+
+    _safeMint(msg.sender, currentToken);
+    changeMakerTokenIdToChangeMakerContract[currentToken] = clone;
+
+    ChangeMaker(clone).initialize(msg.sender);
   }
 }

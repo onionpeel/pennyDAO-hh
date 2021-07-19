@@ -85,4 +85,6 @@ contract ChangeMakers is OwnableUpgradeable {
     isAuthorized[_changeMaker] = false;
     emit RemovedChangeMakerAuthorization(_changeMaker);
   }
+
+  
 }

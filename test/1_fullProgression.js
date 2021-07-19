@@ -163,7 +163,7 @@ xdescribe('fullProgression', () => {
   });
 
   it('Projects: ChangeDAO attempts to call createTokens but fails because not authorized', async () =>{
-    expect(projects.createTokens(arrayOfDataForMintingNFTs, ethers.BigNumber.from(2))).to.be.revertedWith("Only the authorized changeMaker can call createTokens()");
+    await expect(projects.createTokens(arrayOfDataForMintingNFTs, ethers.BigNumber.from(2))).to.be.revertedWith("Only the authorized changeMaker can call createTokens()");
   });
 
   it('Projects: authorized changeMaker successfully calls createTokens()', async () => {

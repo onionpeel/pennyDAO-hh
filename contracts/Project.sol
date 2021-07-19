@@ -2,10 +2,16 @@
 pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./ChangeDAO";
 
-contract Project {
+contract Project is ERC721 {
   address public owner;
+
+  modifier onlyOwner() {
+    require(msg.sender == owner, "Only the contract owner can call this function");
+    _;
+  }
 
   // using Counters for Counters.Counter;
   // Counters.Counter public projectTokenId;
@@ -66,6 +72,10 @@ contract Project {
       currentFunding += _amount;
     }
 
+    if(currentFunding >= fundingThreshold) {
+      isFullyFunded = true;
+    }
+
     Sponsor memory newSponsor = Sponsor({
       sponsorAddress: msg.sender,
       sponsorFundingAmount: _amount,
@@ -99,5 +109,17 @@ contract Project {
     }
   }
 
-  
+  function mintSponsorNFTs(string[] memory sponsorCIDs) public onlyOwner{
+    require(!hasMinted, "NFTs for this project have already been minted");
+    require(isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+    project.hasMinted = true;
+
+    for(uint256 i = 0; i < sponsors.length; i++) {
+      Sponsor memory sponsor = sponsors[i];
+
+      _safeMint(sponsor.sponsorAddress, i + 1);
+      ///??????????????
+      //_setTokenURI(i + 1, sponsorCIDs[i]);
+    }
+  }
 }

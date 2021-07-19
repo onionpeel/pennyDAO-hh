@@ -46,6 +46,29 @@ contract ChangeDAO is ERC721, Ownable {
     changeMakerImplementation = address(new ChangeMaker());
   }
 
+
+
+  uint256 public changeMakerPercentage;
+  uint256 public changeDaoPercentage;
+  uint256 public communityFundPercentage;
+
+  function adjustPercentageDistributions(
+    uint256 _changeMakerPercentage,
+    uint256 _changeDaoPercentage,
+    uint256 _communityFundPercentage,
+  )
+    public onlyOwner
+  {
+    require(_changeMakerPercentage + _changeDaoPercentage + _communityFundPercentage == 100,
+      "The sum of the distribution percentages must equal 100");
+    changeMakerPercentage = _changeMakerPercentage;
+    changeDaoPercentage = _changeDaoPercentage;
+    communityFundPercentage = _communityFundPercentage;
+  }
+
+
+
+
   function register() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");

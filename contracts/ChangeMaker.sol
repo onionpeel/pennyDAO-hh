@@ -18,7 +18,12 @@ contract ChangeMaker is ERC721 {
     projectImplementation = address(new Project());
   }
 
-  function createProject() public {
+  function createProject(
+    uint256 _expirationTime,
+    uint256 _fundingThreshold
+  )
+    public
+  {
     require(msg.sender == owner, "Msg.sender must be contract owner");
 
     address clone = Clones.clone(projectImplementation);
@@ -29,6 +34,10 @@ contract ChangeMaker is ERC721 {
     _safeMint(msg.sender, currentToken);
     projectIdToProjectContract[currentToken] = clone;
 
-    Project(clone).initialize(msg.sender);
+    Project(clone).initialize(
+      msg.sender,
+      _expirationTime,
+      _fundingThreshold
+    );
   }
 }

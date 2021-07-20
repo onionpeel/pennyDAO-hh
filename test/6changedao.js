@@ -55,9 +55,9 @@ describe('ChangeDAO.sol', () => {
       await changeDAO.approveNewChangeMaker(organization1.address);
       let org1Contract = changeDAO.connect(organization1);
       await org1Contract.register();
-      expect(await changeDAO.tokenId()).to.equal(1);
+      expect(await changeDAO.changeMakerTokenId()).to.equal(1);
       expect(await changeDAO.ownerOf('1')).to.equal(organization1.address);
-      let org1ProxyAddress = await changeDAO.tokenIdToChangeMakerContract('1');
+      let org1ProxyAddress = await changeDAO.tokenIdToChangeMaker('1');
       expect(org1ProxyAddress.length).to.equal(42);
     });
   });

@@ -8,8 +8,21 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./ChangeMaker.sol";
 
 contract ChangeDAO is ERC721, Ownable {
+  using Counters for Counters.Counter;
+  Counters.Counter public changeMakerTokenId;
+  address immutable changeMakerImplementation;
+  uint256 public changeMakerPercentage = 98;
+  uint256 public changeDaoPercentage = 1;
+  uint256 public communityFundPercentage = 1;
+
+  mapping (uint256 => address) public tokenIdToChangeMaker;
+
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
-  mapping (address => bool) approvedChangeMakers;
+  mapping (address => bool) public approvedChangeMakers;
+
+  constructor() ERC721('ChangeDAO', 'CHNDv1IMPL') {
+    changeMakerImplementation = address(new ChangeMaker());
+  }
 
   /// @notice The contract owner grants approval to become a changemaker
   /// @dev Only the contract owner can call this function
@@ -18,6 +31,7 @@ contract ChangeDAO is ERC721, Ownable {
     approvedChangeMakers[newChangeMaker] = true;
   }
 
+  //THIS FUNCTION ISN'T NECESSARY SINCE approvedChangeMakers IS PUBLIC. SHOULD IT BE REMOVED?
   /// @notice Check if an address has been approved as a changeMaker
   /// @param changeMaker Address to be checked for approval status
   /// @return true = approved
@@ -30,25 +44,6 @@ contract ChangeDAO is ERC721, Ownable {
   function removeApproval(address changeMaker) public onlyOwner {
     approvedChangeMakers[changeMaker] = false;
   }
-
-
-
-  using Counters for Counters.Counter;
-  Counters.Counter public changeMakerTokenId;
-  address immutable changeMakerImplementation;
-  mapping (uint256 => address) public changeMakerTokenIdToChangeMakerContract;
-
-  constructor() ERC721('ChangeDAO', 'CHNDv1IMPL') {
-    changeMakerImplementation = address(new ChangeMaker());
-  }
-
-
-
-
-
-  uint256 public changeMakerPercentage;
-  uint256 public changeDaoPercentage;
-  uint256 public communityFundPercentage;
 
   function adjustPercentageDistributions(
     uint256 _changeMakerPercentage,
@@ -64,9 +59,6 @@ contract ChangeDAO is ERC721, Ownable {
     communityFundPercentage = _communityFundPercentage;
   }
 
-
-
-
   function register() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
@@ -77,7 +69,7 @@ contract ChangeDAO is ERC721, Ownable {
     uint256 currentToken = changeMakerTokenId.current();
 
     _safeMint(msg.sender, currentToken);
-    changeMakerTokenIdToChangeMakerContract[currentToken] = clone;
+    tokenIdToChangeMaker[currentToken] = clone;
 
     ChangeMaker(clone).initialize();
   }

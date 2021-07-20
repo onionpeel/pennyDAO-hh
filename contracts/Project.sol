@@ -36,15 +36,11 @@ contract Project is ERC721, Ownable {
     changeDAO = ChangeDAO(_changeDAOAddress);
   }
 
-
   struct Sponsor {
     address sponsorAddress;
     uint256 sponsorFundingAmount;
     string sponsorStablecoin;
   }
-
-  // uint256 public currentSponsorId;
-  // mapping (uint256 => Sponsor) sponsors;
 
   Sponsor[] public sponsors;
 
@@ -98,6 +94,7 @@ contract Project is ERC721, Ownable {
     }
   }
 
+  //THIS WILL BE CHANGED TO USE ERC1155
   // function mintSponsorNFTs(string[] memory sponsorCIDs) public onlyOwner{
   //   require(!hasMinted, "NFTs for this project have already been minted");
   //   require(isFullyFunded, "Project needs to be fully funded before NFTs are minted");

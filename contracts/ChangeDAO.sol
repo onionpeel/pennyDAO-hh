@@ -38,13 +38,11 @@ contract ChangeDAO is ERC721, Ownable {
   address immutable changeMakerImplementation;
   mapping (uint256 => address) public changeMakerTokenIdToChangeMakerContract;
 
-  // constructor() ERC721('ChangeDAO', 'CHD') {
-  //   changeMakerImplementation = address(new ChangeMaker());
-  // }
-
-  constructor() {
+  constructor() ERC721('ChangeDAO', 'CHNDv1IMPL') {
     changeMakerImplementation = address(new ChangeMaker());
   }
+
+
 
 
 
@@ -55,7 +53,7 @@ contract ChangeDAO is ERC721, Ownable {
   function adjustPercentageDistributions(
     uint256 _changeMakerPercentage,
     uint256 _changeDaoPercentage,
-    uint256 _communityFundPercentage,
+    uint256 _communityFundPercentage
   )
     public onlyOwner
   {
@@ -81,6 +79,6 @@ contract ChangeDAO is ERC721, Ownable {
     _safeMint(msg.sender, currentToken);
     changeMakerTokenIdToChangeMakerContract[currentToken] = clone;
 
-    ChangeMaker(clone).initialize(msg.sender);
+    ChangeMaker(clone).initialize();
   }
 }

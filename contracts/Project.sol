@@ -3,21 +3,10 @@ pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "./ChangeDAO";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./ChangeDAO.sol";
 
-contract Project is ERC721 {
-  address public owner;
-
-  modifier onlyOwner() {
-    require(msg.sender == owner, "Only the contract owner can call this function");
-    _;
-  }
-
-  // using Counters for Counters.Counter;
-  // Counters.Counter public projectTokenId;
-  // address immutable projectImplementation;
-  // mapping (uint256 => address) public projectIdToProjectContract;
-
+contract Project is ERC721, Ownable {
   uint256 public expirationTime;
   uint256 public fundingThreshold;
   uint256 public currentFunding;
@@ -26,25 +15,25 @@ contract Project is ERC721 {
   bool public hasWithdrawnChangeMakerShare;
   bool public hasWithdrawnChangeDaoShare;
   bool public hasWithdrawnCommunityFundShare;
-
   IERC20 dai;
   IERC20 usdc;
-  ChangeDao changeDAO;
+  ChangeDAO changeDAO;
+
+  constructor() ERC721("Project", "PRJTv1IMPL") {
+    dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+  }
 
   function initialize(
-    address _owner,
     uint256 _expirationTime,
     uint256 _fundingThreshold,
-    address changeDAOAddress
+    address _changeDAOAddress
   )
     public
   {
-    owner = _owner;
     expirationTime = _expirationTime;
     fundingThreshold = _fundingThreshold;
-    dai = IERC20(0x6b175474e89094c44da98b954eedeac495271d0f);
-    usdc = IERC20(0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48);
-    changeDAO = ChangeDAO(changeDAOAddress);
+    changeDAO = ChangeDAO(_changeDAOAddress);
   }
 
 
@@ -60,8 +49,8 @@ contract Project is ERC721 {
   Sponsor[] public sponsors;
 
   function fundProject(uint256 _amount, string memory _stablecoin) public {
-    require(project.expirationTime > block.timestamp, "Funding period has ended");
-    require(!project.projectFunding.isFullyFunded, "Project is already fully funded");
+    require(expirationTime > block.timestamp, "Funding period has ended");
+    require(!isFullyFunded, "Project is already fully funded");
 
     ///currentFunding is stored with 18 decimal places.  USDC amounts need to be adjusted since they are stored with only 6.
     if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
@@ -109,17 +98,17 @@ contract Project is ERC721 {
     }
   }
 
-  function mintSponsorNFTs(string[] memory sponsorCIDs) public onlyOwner{
-    require(!hasMinted, "NFTs for this project have already been minted");
-    require(isFullyFunded, "Project needs to be fully funded before NFTs are minted");
-    project.hasMinted = true;
-
-    for(uint256 i = 0; i < sponsors.length; i++) {
-      Sponsor memory sponsor = sponsors[i];
-
-      _safeMint(sponsor.sponsorAddress, i + 1);
-      ///??????????????
-      //_setTokenURI(i + 1, sponsorCIDs[i]);
-    }
-  }
+  // function mintSponsorNFTs(string[] memory sponsorCIDs) public onlyOwner{
+  //   require(!hasMinted, "NFTs for this project have already been minted");
+  //   require(isFullyFunded, "Project needs to be fully funded before NFTs are minted");
+  //   hasMinted = true;
+  //
+  //   for(uint256 i = 0; i < sponsors.length; i++) {
+  //     Sponsor memory sponsor = sponsors[i];
+  //
+  //     _safeMint(sponsor.sponsorAddress, i + 1);
+  //     ///??????????????
+  //     //_setTokenURI(i + 1, sponsorCIDs[i]);
+  //   }
+  // }
 }

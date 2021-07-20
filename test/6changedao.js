@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-xdescribe('ChangeDAO.sol', () => {
+describe('ChangeDAO.sol', () => {
   let changeDAO;
   let changeDAOOwner, organization1;
 

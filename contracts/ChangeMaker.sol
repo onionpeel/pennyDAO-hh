@@ -12,14 +12,16 @@ contract ChangeMaker is ERC721, Ownable {
   Counters.Counter public projectTokenId;
   address projectImplementation;
   address changeDAOAddress;
+  address changeDAOAdmin;
   mapping (uint256 => address) public projectIdToProject;
 
   constructor() ERC721("ChangeMaker", "CHNGv1IMPL") {
     projectImplementation = address(new Project());
   }
 
-  function initialize() public {
+  function initialize(address _changeDAOAdmin) public {
     changeDAOAddress = owner();
+    changeDAOAdmin = _changeDAOAdmin;
   }
 
   function createProject(
@@ -40,7 +42,8 @@ contract ChangeMaker is ERC721, Ownable {
     Project(clone).initialize(
       _expirationTime,
       _fundingThreshold,
-      changeDAOAddress
+      changeDAOAddress,
+      changeDAOAdmin
     );
   }
 }

@@ -20,6 +20,7 @@ contract Project is ERC721, Ownable {
   IERC20 dai;
   IERC20 usdc;
   ChangeDAO changeDAO;
+  address changeDAOAdmin;
 
   constructor() ERC721("Project", "PRJTv1IMPL") {
     dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
@@ -29,13 +30,15 @@ contract Project is ERC721, Ownable {
   function initialize(
     uint256 _expirationTime,
     uint256 _fundingThreshold,
-    address _changeDAOAddress
+    address _changeDAOAddress,
+    address _changeDAOAdmin
   )
     public
   {
     expirationTime = _expirationTime;
     fundingThreshold = _fundingThreshold;
     changeDAO = ChangeDAO(_changeDAOAddress);
+    changeDAOAdmin = _changeDAOAdmin;
   }
 
   struct Sponsor {
@@ -140,8 +143,12 @@ contract Project is ERC721, Ownable {
     }
   }
 
-  ///NEED TO HAVE ACCESS CONTROL SO ONLY CHANGEDAO CAN CALL
-  function withdrawChangeDaoShare() public  {
+  modifier onlyChangeDAOAdmin() {
+    require(msg.sender == changeDAOAdmin, "Only changeDAOAdmin can call this function");
+    _;
+  }
+
+  function withdrawChangeDaoShare() public onlyChangeDAOAdmin {
     require(hasMinted, "NFTs for this project have already been minted");
     require(hasWithdrawnChangeDaoShare,
       "ChangeDAO share has already been withdrawn from this project");
@@ -163,7 +170,7 @@ contract Project is ERC721, Ownable {
     }
   }
 
-  function withdrawCommunityFundShare() public  {
+  function withdrawCommunityFundShare() public onlyChangeDAOAdmin {
     require(hasMinted, "NFTs for this project have already been minted");
     require(hasWithdrawnCommunityFundShare,
       "CommunityFund share has already been withdrawn from this project");

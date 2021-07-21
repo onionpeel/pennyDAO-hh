@@ -73,6 +73,6 @@ contract ChangeDAO is ERC721, Ownable {
     _safeMint(msg.sender, currentToken);
     tokenIdToChangeMaker[currentToken] = clone;
 
-    ChangeMaker(clone).initialize();
+    ChangeMaker(clone).initialize(msg.sender);
   }
 }

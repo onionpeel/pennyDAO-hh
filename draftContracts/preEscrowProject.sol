@@ -9,7 +9,6 @@ import "./ChangeDAO.sol";
 contract Project is ERC721, Ownable {
   uint256 public expirationTime;
   uint256 public fundingThreshold;
-  uint256 public minimumSponsorship;
   uint256 public currentFunding;
   uint256 public daiFundingAmount;
   uint256 public usdcFundingAmount;
@@ -22,7 +21,7 @@ contract Project is ERC721, Ownable {
   IERC20 usdc;
   ChangeDAO changeDAO;
   address changeDAOAdmin;
-  bool initialized;
+  bool private initialized;
 
   constructor() ERC721("Project", "PRJTv1IMPL") {
     dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
@@ -32,7 +31,6 @@ contract Project is ERC721, Ownable {
   function initialize(
     uint256 _expirationTime,
     uint256 _fundingThreshold,
-    uint256 _minimumSponsorship,
     address _changeDAOAddress,
     address _changeDAOAdmin
   )
@@ -42,7 +40,6 @@ contract Project is ERC721, Ownable {
     initialized = true;
     expirationTime = _expirationTime;
     fundingThreshold = _fundingThreshold;
-    minimumSponsorship = _minimumSponsorship;
     changeDAO = ChangeDAO(_changeDAOAddress);
     changeDAOAdmin = _changeDAOAdmin;
   }
@@ -55,19 +52,18 @@ contract Project is ERC721, Ownable {
 
   Sponsor[] public sponsors;
 
-  function fundProject(uint256 amount, string memory stablecoin) public {
+  function fundProject(uint256 _amount, string memory _stablecoin) public {
     require(expirationTime > block.timestamp, "Funding period has ended");
     require(!isFullyFunded, "Project is already fully funded");
-    require(amount > minimumSponsorship, "Funding amount is insufficient");
-    
+
     ///currentFunding is stored with 18 decimal places.  USDC amounts need to be adjusted since they are stored with only 6.
-    if(keccak256(abi.encodePacked(stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
-      uint256 usdcAdjustedAmount = amount * 10**12;
+    if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
+      uint256 usdcAdjustedAmount = _amount * 10**12;
       currentFunding += usdcAdjustedAmount;
       usdcFundingAmount += usdcAdjustedAmount;
     } else {
-      currentFunding += amount;
-      daiFundingAmount += amount;
+      currentFunding += _amount;
+      daiFundingAmount += _amount;
     }
 
     if(currentFunding >= fundingThreshold) {
@@ -76,19 +72,19 @@ contract Project is ERC721, Ownable {
 
     Sponsor memory newSponsor = Sponsor({
       sponsorAddress: msg.sender,
-      sponsorFundingAmount: amount,
-      sponsorStablecoin: stablecoin
+      sponsorFundingAmount: _amount,
+      sponsorStablecoin: _stablecoin
     });
 
     sponsors.push(newSponsor);
 
     ///Transfer the sponsor's stablecoin to Project.sol
-    if(keccak256(abi.encodePacked(stablecoin)) == keccak256(abi.encodePacked("dai"))) {
+    if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("dai"))) {
       ///The sponsor's DAI get transferred to the Projects.sol contract
-      dai.transferFrom(msg.sender, address(this), amount);
-    } else if(keccak256(abi.encodePacked(stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
+      dai.transferFrom(msg.sender, address(this), _amount);
+    } else if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
       ///The sponsor's USDC get transferred to the Projects.sol contract
-      usdc.transferFrom(msg.sender, address(this), amount);
+      usdc.transferFrom(msg.sender, address(this), _amount);
     }
   }
 

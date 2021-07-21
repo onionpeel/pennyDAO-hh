@@ -13,6 +13,7 @@ contract ChangeMaker is ERC721, Ownable {
   address projectImplementation;
   address changeDAOAddress;
   address changeDAOAdmin;
+  bool private initialized;
   mapping (uint256 => address) public projectIdToProject;
 
   constructor() ERC721("ChangeMaker", "CHNGv1IMPL") {
@@ -20,13 +21,16 @@ contract ChangeMaker is ERC721, Ownable {
   }
 
   function initialize(address _changeDAOAdmin) public {
+    require(!initialized, "Contract has already been initialized");
+    initialized = true;
     changeDAOAddress = owner();
     changeDAOAdmin = _changeDAOAdmin;
   }
 
   function createProject(
-    uint256 _expirationTime,
-    uint256 _fundingThreshold
+    uint256 expirationTime,
+    uint256 fundingThreshold,
+    uint256 minimumSponsorship
   )
     public
     onlyOwner
@@ -40,8 +44,9 @@ contract ChangeMaker is ERC721, Ownable {
     projectIdToProject[currentToken] = clone;
 
     Project(clone).initialize(
-      _expirationTime,
-      _fundingThreshold,
+      expirationTime,
+      fundingThreshold,
+      minimumSponsorship,
       changeDAOAddress,
       changeDAOAdmin
     );

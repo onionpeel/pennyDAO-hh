@@ -10,6 +10,8 @@ contract Project is ERC721, Ownable {
   uint256 public expirationTime;
   uint256 public fundingThreshold;
   uint256 public currentFunding;
+  uint256 public daiFundingAmount;
+  uint256 public usdcFundingAmount;
   bool public isFullyFunded;
   bool public hasMinted;
   bool public hasWithdrawnChangeMakerShare;
@@ -50,11 +52,12 @@ contract Project is ERC721, Ownable {
 
     ///currentFunding is stored with 18 decimal places.  USDC amounts need to be adjusted since they are stored with only 6.
     if(keccak256(abi.encodePacked(_stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
-      uint256 usdcAdjustedAmount;
-      usdcAdjustedAmount = _amount * 10**12;
+      uint256 usdcAdjustedAmount = _amount * 10**12;
       currentFunding += usdcAdjustedAmount;
+      usdcFundingAmount += usdcAdjustedAmount;
     } else {
       currentFunding += _amount;
+      daiFundingAmount += _amount;
     }
 
     if(currentFunding >= fundingThreshold) {
@@ -108,4 +111,78 @@ contract Project is ERC721, Ownable {
   //     //_setTokenURI(i + 1, sponsorCIDs[i]);
   //   }
   // }
+
+
+
+  /*@notice The changeMaker that created a specific project can withdraw its share of the funding after minting tokens*/
+  function withdrawChangemakerShare() public onlyOwner {
+    require(hasMinted, "NFTs for this project have already been minted");
+    require(!hasWithdrawnChangeMakerShare,
+      "The changeMaker funding has already been withdrawn");
+
+    ///Update state on the project to prevent funding from being withdrawn more than once
+    hasWithdrawnChangeMakerShare = true;
+
+    uint256 changeMakerPercentage = changeDAO.changeMakerPercentage();
+
+    ///Set the amount of DAI and USDC the changeMaker will receive from this project
+    uint256 changeMakerDaiShare =
+      uint256(daiFundingAmount) * uint256(changeMakerPercentage) / uint256(10000);
+
+    uint256 changeMakerUsdcShare =
+      uint256(usdcFundingAmount) * uint256(changeMakerPercentage) / uint256(10000) / uint256(10**12);
+
+    if (changeMakerDaiShare > 0) {
+      dai.transfer(msg.sender, changeMakerDaiShare);
+    }
+    if (changeMakerUsdcShare > 0) {
+      usdc.transfer(msg.sender, changeMakerUsdcShare);
+    }
+  }
+
+  ///NEED TO HAVE ACCESS CONTROL SO ONLY CHANGEDAO CAN CALL
+  function withdrawChangeDaoShare() public  {
+    require(hasMinted, "NFTs for this project have already been minted");
+    require(hasWithdrawnChangeDaoShare,
+      "ChangeDAO share has already been withdrawn from this project");
+
+    hasWithdrawnChangeDaoShare = true;
+
+    uint256 changeDaoPercentage = changeDAO.changeDaoPercentage();
+
+    ///Set the amount of DAI and USDC ChangeDAO will receive from this project
+    uint256 changeDaoDaiShare = uint256(daiFundingAmount) * uint256(changeDaoPercentage) / uint256(10000);
+
+    uint256 changeDaoUsdcShare = uint256(usdcFundingAmount) * uint256(changeDaoPercentage) / uint256(10000) / uint256(10**12);
+
+    if (changeDaoDaiShare > 0) {
+      dai.transfer(msg.sender, changeDaoDaiShare);
+    }
+    if (changeDaoUsdcShare > 0) {
+      usdc.transfer(msg.sender, changeDaoUsdcShare);
+    }
+  }
+
+  function withdrawCommunityFundShare() public  {
+    require(hasMinted, "NFTs for this project have already been minted");
+    require(hasWithdrawnCommunityFundShare,
+      "CommunityFund share has already been withdrawn from this project");
+
+    hasWithdrawnCommunityFundShare = true;
+
+    uint256 communityFundPercentage = changeDAO.communityFundPercentage();
+
+    ///Set the amount of DAI and USDC the community fund will receive from this project
+    uint256 communityFundDaiShare = uint256(daiFundingAmount) * uint256(communityFundPercentage) / uint256(10000);
+
+    uint256 communityFundUsdcShare = uint256(usdcFundingAmount) * uint256(communityFundPercentage) / uint256(10000) / uint256(10**12);
+
+    ///To save gas, check that amounts are greater than zero before attempting transfers
+    if (communityFundDaiShare > 0) {
+      dai.transfer(msg.sender, communityFundDaiShare);
+    }
+    if (communityFundUsdcShare > 0) {
+      usdc.transfer(msg.sender, communityFundUsdcShare);
+    }
+  }
 }

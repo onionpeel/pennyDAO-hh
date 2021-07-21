@@ -11,9 +11,10 @@ contract ChangeDAO is ERC721, Ownable {
   using Counters for Counters.Counter;
   Counters.Counter public changeMakerTokenId;
   address immutable changeMakerImplementation;
-  uint256 public changeMakerPercentage = 98;
-  uint256 public changeDaoPercentage = 1;
-  uint256 public communityFundPercentage = 1;
+  ///Percentages are stored using basis points
+  uint256 public changeMakerPercentage = 9800;
+  uint256 public changeDaoPercentage = 100;
+  uint256 public communityFundPercentage = 100;
 
   mapping (uint256 => address) public tokenIdToChangeMaker;
 
@@ -45,6 +46,7 @@ contract ChangeDAO is ERC721, Ownable {
     approvedChangeMakers[changeMaker] = false;
   }
 
+  /// @notice All percentages must be expressed as basis points
   function adjustPercentageDistributions(
     uint256 _changeMakerPercentage,
     uint256 _changeDaoPercentage,
@@ -52,8 +54,8 @@ contract ChangeDAO is ERC721, Ownable {
   )
     public onlyOwner
   {
-    require(_changeMakerPercentage + _changeDaoPercentage + _communityFundPercentage == 100,
-      "The sum of the distribution percentages must equal 100");
+    require(_changeMakerPercentage + _changeDaoPercentage + _communityFundPercentage == 10000,
+      "The sum of the distribution percentages must be less than or equal to 100000");
     changeMakerPercentage = _changeMakerPercentage;
     changeDaoPercentage = _changeDaoPercentage;
     communityFundPercentage = _communityFundPercentage;

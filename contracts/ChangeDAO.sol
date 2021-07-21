@@ -12,17 +12,20 @@ contract ChangeDAO is ERC721, Ownable {
   Counters.Counter public changeMakerTokenId;
   address immutable changeMakerImplementation;
   ///Percentages are stored using basis points
-  uint256 public changeMakerPercentage = 9800;
-  uint256 public changeDaoPercentage = 100;
-  uint256 public communityFundPercentage = 100;
+  uint256 public changeMakerPercentage;
+  uint256 public changeDaoPercentage;
+  uint256 public communityFundPercentage;
 
   mapping (uint256 => address) public tokenIdToChangeMaker;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
 
-  constructor() ERC721('ChangeDAO', 'CHNDv1IMPL') {
-    changeMakerImplementation = address(new ChangeMaker());
+  constructor(address dai, address usdc) ERC721('ChangeDAO', 'CHNDv1IMPL') {
+    changeMakerImplementation = address(new ChangeMaker(dai, usdc));
+    changeMakerPercentage = 9800;
+    changeDaoPercentage = 100;
+    communityFundPercentage = 100;
   }
 
   /// @notice The contract owner grants approval to become a changemaker

@@ -24,9 +24,9 @@ contract Project is ERC721, Ownable {
   address changeDAOAdmin;
   bool initialized;
 
-  constructor() ERC721("Project", "PRJTv1IMPL") {
-    dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+  constructor(address _dai, address _usdc) ERC721("Project", "PRJTv1IMPL") {
+    dai = IERC20(_dai);
+    usdc = IERC20(_usdc);
   }
 
   function initialize(
@@ -59,7 +59,7 @@ contract Project is ERC721, Ownable {
     require(expirationTime > block.timestamp, "Funding period has ended");
     require(!isFullyFunded, "Project is already fully funded");
     require(amount > minimumSponsorship, "Funding amount is insufficient");
-    
+
     ///currentFunding is stored with 18 decimal places.  USDC amounts need to be adjusted since they are stored with only 6.
     if(keccak256(abi.encodePacked(stablecoin)) == keccak256(abi.encodePacked("usdc"))) {
       uint256 usdcAdjustedAmount = amount * 10**12;

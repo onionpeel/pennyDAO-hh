@@ -16,8 +16,8 @@ contract ChangeMaker is ERC721, Ownable {
   bool private initialized;
   mapping (uint256 => address) public projectIdToProject;
 
-  constructor() ERC721("ChangeMaker", "CHNGv1IMPL") {
-    projectImplementation = address(new Project());
+  constructor(address dai, address usdc) ERC721("ChangeMaker", "CHNGv1IMPL") {
+    projectImplementation = address(new Project(dai, usdc));
   }
 
   function initialize(address _changeDAOAdmin) public {

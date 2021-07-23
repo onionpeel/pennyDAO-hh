@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ChangeDao is Ownable {
   ///Percentages are stored using basis points
   uint16 public changeMakerPercentage = 9800;
-  uint16 public changeDaoPercentage = 1000;
+  uint16 public changeDaoPercentage = 100;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
@@ -15,7 +15,7 @@ contract ChangeDao is Ownable {
 
   /// @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
   function getCommunityFundPercentage() public view returns (uint16){
-    return 10000 - changeMakerPercentage - changeDaoPercentage;
+    return 10000 - (changeMakerPercentage + changeDaoPercentage);
   }
 
   /// @notice The ChangeDao contract owner grants approval to become a changemaker

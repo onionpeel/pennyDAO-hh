@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ChangeDAO is Ownable {
+contract ChangeDao is Ownable {
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;

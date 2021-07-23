@@ -7,22 +7,26 @@ contract ChangeDao is Ownable {
   ///Percentages are stored using basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 1000;
-  uint16 public communityFundPercentage = 1000;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
 
   constructor() {}
 
-  /// @notice The ChageDao contract owner grants approval to become a changemaker
+  /// @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
+  function getCommunityFundPercentage() public view returns (uint16){
+    return 10000 - changeMakerPercentage - changeDaoPercentage;
+  }
+
+  /// @notice The ChangeDao contract owner grants approval to become a changemaker
   /// @dev Only the contract owner can call this function
-  /// @param newChangeMaker The address that will be added to the mapping of approved changemakers
+  /// @param _newChangeMaker The address that will be added to the mapping of approved changemakers
   function approveNewChangeMaker(address _newChangeMaker) public onlyOwner {
     approvedChangeMakers[_newChangeMaker] = true;
   }
 
   /// @notice The contract owner removes a changemaker's approval status
-  /// @param changeMaker Address to be set to false in approvedChangeMakers mapping
+  /// @param _changeMaker Address to be set to false in approvedChangeMakers mapping
   function removeApproval(address _changeMaker) public onlyOwner {
     approvedChangeMakers[_changeMaker] = false;
   }
@@ -42,7 +46,6 @@ contract ChangeDao is Ownable {
       "The sum of the distribution percentages must be equal to 100000");
     changeMakerPercentage = _changeMakerPercentage;
     changeDaoPercentage = _changeDaoPercentage;
-    communityFundPercentage = _communityFundPercentage;
   }
 
   function register() public {

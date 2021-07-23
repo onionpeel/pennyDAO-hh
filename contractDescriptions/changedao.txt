@@ -1,6 +1,7 @@
 1. Ownable
 The contract is Ownable so that the address which deploys this contract will have access control over any functions with the modifier, onlyOwner.
 
+
 2. Approval
 All changemakers need to be registered in order to create projects.
 
@@ -16,21 +17,23 @@ The changeDao owner has the ability to revoke an organization's status to be a c
 Questions:
 Q1) SKELLETOR: The addresses in approvedChangeMakers are all unique values.  Would it be better to use EnumerableSet.AddressSet?
 
-Q2) GEORGE: Do you want a getter function to return the approval status?  Or is it okay just to get it from the mapping directly since it is a public function?
 
 3. Registration
 a) register()
 Only organization's that have their address in approvedChangeMakers set to true can call this function.
 More to come (obviously!! otherwise this is the world's simplest app)
 
+
 4. Fund distribution
 a) state variables
 changeMakerPercentage
 changeDaoPercentage
-communityFundPercentage
 These variables hold the percentage value that each will receive when funds are distributed after a project has been fully funded and tokens have been minted.
 
-b) setPercentageDistributions()
+b) getCommunityFundPercentage()
+The communityFund's percentage is not stored as a state variable in order to reduce gas costs.  Its value can be determined as needed by calling getCommunityFundPercentage, which
+
+c) setPercentageDistributions()
 The owner of the ChangeDao contract can set the percentages.
 
-Q3) SKELLETOR: The max value for any variable is 10000.  So it will work to declare these as uint16, right?  This will allow all of them to be stored in one slot.
+Q2) SKELLETOR: The max value for any variable is 10000.  So it will work to declare these as uint16, right?  This will allow all of them to be stored in one slot.

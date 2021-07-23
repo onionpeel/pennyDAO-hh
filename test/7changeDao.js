@@ -48,7 +48,7 @@ describe('ChangeDao.sol', () => {
     });
 
     it('removeApproval(): only changeDaoOwner can remove approvals', async () => {
-      let org2Contract = await changeDao.connect(organization2.address);
+      let org2Contract = await changeDao.connect(organization2);
       await expect(org2Contract.removeApproval(organization1.address)).to.be.reverted;
     });
 
@@ -65,8 +65,21 @@ describe('ChangeDao.sol', () => {
       expect(await changeDao.changeDaoPercentage()).to.equal(100);
     });
 
-    it('getCommunityFundPercentage() retrieves communityFund percentage', async () => {
+    it('getCommunityFundPercentage(): retrieves communityFund percentage', async () => {
       expect(await changeDao.getCommunityFundPercentage()).to.equal(100);
+    });
+
+    it('setPercentageDistributions(): only changeDao owner can call function', async () => {
+      let org1Contract = changeDao.connect(organization1);
+      await expect(org1Contract.setPercentageDistributions('9500', '200', '300'))
+        .to.be.reverted;
+    });
+
+    it('setPercentageDistributions(): changeDaoOwner sets new percentages', async () => {
+      await changeDao.setPercentageDistributions('9500', '200', '300');
+      expect(await changeDao.changeMakerPercentage()).to.equal(9500);
+      expect(await changeDao.changeDaoPercentage()).to.equal(200);
+      expect(await changeDao.getCommunityFundPercentage()).to.equal(300);
     });
   });
 

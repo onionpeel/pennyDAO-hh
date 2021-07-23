@@ -13,11 +13,6 @@ contract ChangeDao is Ownable {
 
   constructor() {}
 
-  /// @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
-  function getCommunityFundPercentage() public view returns (uint16){
-    return 10000 - (changeMakerPercentage + changeDaoPercentage);
-  }
-
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
   /// @dev Only the contract owner can call this function
   /// @param _newChangeMaker The address that will be added to the mapping of approved changemakers
@@ -29,6 +24,11 @@ contract ChangeDao is Ownable {
   /// @param _changeMaker Address to be set to false in approvedChangeMakers mapping
   function removeApproval(address _changeMaker) public onlyOwner {
     approvedChangeMakers[_changeMaker] = false;
+  }
+
+  /// @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
+  function getCommunityFundPercentage() public view returns (uint16){
+    return 10000 - (changeMakerPercentage + changeDaoPercentage);
   }
 
   /// @notice All percentages must be expressed as basis points (9675 => 96.75%)

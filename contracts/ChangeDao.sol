@@ -17,13 +17,13 @@ contract ChangeDao is Ownable {
   /// @notice The ChageDao contract owner grants approval to become a changemaker
   /// @dev Only the contract owner can call this function
   /// @param newChangeMaker The address that will be added to the mapping of approved changemakers
-  function approveNewChangeMaker(address _newChangeMaker) external onlyOwner {
+  function approveNewChangeMaker(address _newChangeMaker) public onlyOwner {
     approvedChangeMakers[_newChangeMaker] = true;
   }
 
   /// @notice The contract owner removes a changemaker's approval status
   /// @param changeMaker Address to be set to false in approvedChangeMakers mapping
-  function removeApproval(address _changeMaker) external onlyOwner {
+  function removeApproval(address _changeMaker) public onlyOwner {
     approvedChangeMakers[_changeMaker] = false;
   }
 
@@ -45,7 +45,7 @@ contract ChangeDao is Ownable {
     communityFundPercentage = _communityFundPercentage;
   }
 
-  function register() external {
+  function register() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
 

@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-describe('ChangeDao.sol', () => {
+xdescribe('ChangeDao.sol', () => {
   let changeDao;
   let changeDaoOwner, organization1, organization2;
 
@@ -19,8 +19,8 @@ describe('ChangeDao.sol', () => {
   describe('ChangeDao contract deployment', () => {
     it('Deploy contract', async () => {
       const ChangeDao = await hre.ethers.getContractFactory('ChangeDao');
-      changeDao = await ChangeDao.deploy();
-      await changeDao.deployed();
+      let contract = await ChangeDao.deploy();
+      changeDao = await contract.deployed();
       expect(changeDao.address.length).to.equal(42);
     });
 
@@ -29,7 +29,7 @@ describe('ChangeDao.sol', () => {
       expect(await changeDao.symbol()).to.equal('CHNDv1IMPL');
     });
 
-    it('Sets changeDaoOwner as contract owner', async () => {
+    it('changeDaoOwner is the contract owner', async () => {
       let contractOwner = await changeDao.owner();
       expect(contractOwner).to.equal(changeDaoOwner.address);
     });

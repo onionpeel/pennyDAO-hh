@@ -24,6 +24,11 @@ describe('ChangeDao.sol', () => {
       expect(changeDao.address.length).to.equal(42);
     });
 
+    it('Retrieves ERC721 name and symbol', async () => {
+      expect(await changeDao.name()).to.equal('ChangeDAO');
+      expect(await changeDao.symbol()).to.equal('CHNDv1IMPL');
+    });
+
     it('Sets changeDaoOwner as contract owner', async () => {
       let contractOwner = await changeDao.owner();
       expect(contractOwner).to.equal(changeDaoOwner.address);
@@ -84,6 +89,29 @@ describe('ChangeDao.sol', () => {
   });
 
   describe('Registration', () => {
+    it('register(): only approved changeMaker can call function', async () => {
+      let org1Contract = changeDao.connect(organization1);
+      await expect(org1Contract.register())
+        .to.be.reverted;
+    });
 
+    it('register(): registers a new changeMaker', async () => {
+      await changeDao.approveNewChangeMaker(organization1.address);
+      const org1Contract = changeDao.connect(organization1);
+
+      await org1Contract.register();
+      await org1Contract.register();
+      await org1Contract.register();
+      expect(await changeDao.changeMakerTokenId()).to.equal(3);
+      expect(await changeDao.balanceOf(organization1.address)).to.equal(3);
+
+      let clone1 = await changeDao.changeMakerClones(1);
+      let clone2 = await changeDao.changeMakerClones(2);
+      expect(clone1).to.not.equal(clone2);
+      expect(clone1.length).to.equal(42);
+      expect(clone2.length).to.equal(42);
+    });
   });
 });
+
+// Test deployed contract and clones for address type.

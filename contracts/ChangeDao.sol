@@ -2,16 +2,28 @@
 pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
+import "./ChangeMaker.sol";
 
-contract ChangeDao is Ownable {
+contract ChangeDao is Ownable, ERC721 {
+  using Counters for Counters.Counter;
+  Counters.Counter public changeMakerTokenId;
+  address immutable changeMakerImplementation;
   ///Percentages are stored using basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
+  /// @notice Maps NFT token id to clone contract address
+  mapping (uint256 => address) public changeMakerClones;
 
-  constructor() {}
+  /// @notice ChangeDao is deployed as an ERC721 contract
+  constructor() ERC721('ChangeDAO', 'CHNDv1IMPL') {
+    changeMakerImplementation = address(new ChangeMaker());
+  }
 
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
   /// @dev Only the contract owner can call this function
@@ -26,7 +38,8 @@ contract ChangeDao is Ownable {
     approvedChangeMakers[_changeMaker] = false;
   }
 
-  /// @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
+  /* @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
+  */
   function getCommunityFundPercentage() public view returns (uint16){
     return 10000 - (changeMakerPercentage + changeDaoPercentage);
   }
@@ -48,10 +61,23 @@ contract ChangeDao is Ownable {
     changeDaoPercentage = _changeDaoPercentage;
   }
 
+  /// @notice Approved changeMakers can register
+  /* @dev A clone from the changeMakerImplementation is created. An NFT is minted for the changeMaker's address.  The clone is mapped to the changeMaker's NFT token id.  Then the clone is initialized.
+  */
   function register() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
 
-    //More to come...
+    address clone = Clones.clone(changeMakerImplementation);
+
+    changeMakerTokenId.increment();
+    uint256 currentToken = changeMakerTokenId.current();
+    _safeMint(msg.sender, currentToken);
+    changeMakerClones[currentToken] = clone;
+
+    ChangeMaker(clone).initialize(msg.sender);
   }
+
+
+  ///DONATION
 }

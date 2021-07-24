@@ -18,13 +18,7 @@ Questions:
 Q1) SKELLETOR: The addresses in approvedChangeMakers are all unique values.  Would it be better to use EnumerableSet.AddressSet?
 
 
-3. Registration
-a) register()
-Only organization's that have their address in approvedChangeMakers set to true can call this function.
-More to come (obviously!! otherwise this is the world's simplest app)
-
-
-4. Fund distribution
+3. Fund distribution
 a) state variables
 changeMakerPercentage
 changeDaoPercentage
@@ -37,3 +31,29 @@ c) setPercentageDistributions()
 The owner of the ChangeDao contract can set the percentages.
 
 Q2) SKELLETOR: The max value for any variable is 10000.  So it will work to declare these as uint16, right?  This will allow all of them to be stored in one slot.
+
+
+4. Registration
+After the changeDao team has approved an organization's application, that organization needs to register on the ChangeDao.sol contract.
+
+a) state variables
+i) Counters.Counter public changeMakerTokenId
+ii) address immutable changeMakerImplementation
+iii) changeMakerClones
+
+b) constructor (note: the constructor is not within register(); it just sets values needed to register)
+i) The ChangeDao contract is created as an ERC721 contract.
+ii) A new ChangeMaker.sol contract is deployed and its address is stored as changeMakerImplementation (this will be used to make clone contracts).
+
+c) register()
+i) Only organizations that have their address in approvedChangeMakers set to true can call this function.
+ii) Every new changeMaker that is created will be represented as a clone of ChangeMaker.sol.
+iii) An NFT is minted that connects the changeMaker's address to a token id.
+iv) This token id is mapped to the clone in changeMakerClones.
+
+Q3) The ChangeDao contract is an ERC721 contract.  What should be its name and symbol?
+Q4) Should the first NFT token value be 0 or 1?
+
+
+5. Donation
+Todo...

@@ -1,0 +1,11 @@
+1. Ownable
+When the ChangeMaker contract is deployed (from withing the ChangeDao contract), the owner of the ChangeMaker contract is set as the address of the ChangeDao contract.
+
+2. Initialization
+The deployed ChangeMaker contract is used for generating clones.  When a clone is created it first calls an initialization function.
+
+a) state variable
+changeDao (address)
+
+b) initialize()
+This sets the value of the changeDao address within the ChangeMaker clone.

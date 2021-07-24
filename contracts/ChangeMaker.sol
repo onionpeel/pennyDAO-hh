@@ -7,15 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ChangeMaker is Ownable, Initializable {
   address public changeDao;
 
-  uint public num = 7;
-
-  // constructor() {}
-
   function initialize(address _changeDao) public initializer {
     changeDao = _changeDao;
   }
 
-  function setNum(uint _num) public {
-    num = _num;
-  }
 }

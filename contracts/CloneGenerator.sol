@@ -4,7 +4,7 @@ pragma solidity 0.8.6;
 import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "../contracts/ChangeMaker.sol";
+import "./ChangeMaker.sol";
 
 /// This is for testing only
 contract CloneGenerator {

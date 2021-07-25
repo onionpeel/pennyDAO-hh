@@ -58,11 +58,19 @@ describe('ChangeMaker.sol', () => {
       /* cloneCreator created the clone, but it does not have access the ChangeMaker's owner property because that is set in a constructor, which only happens when ChangeMaker is deployed */
       let changeMakerOwner = await clone.owner();
       expect(changeMakerOwner).to.equal('0x0000000000000000000000000000000000000000');
-
-      // The cloneCreator address is set as the cloneOwner via initialize()
-      let cloneOwner = await clone.cloneOwner();
-      expect(cloneOwner).to.equal(cloneCreator.address);
     });
   });
 
+  describe('Initialization', () => {
+    it('initialize(): sets values', async () => {
+      // The cloneCreator address is set as the cloneOwner via initialize()
+      let cloneOwner = await clone.cloneOwner();
+      expect(cloneOwner).to.equal(cloneCreator.address);
+      // The changeDao address that deployed the ChangeMaker instance
+      let cloneDeployer = await clone.changeDao();
+      expect(cloneDeployer).to.equal(cloneGenerator.address);
+    });
+  });
+
+  
 });

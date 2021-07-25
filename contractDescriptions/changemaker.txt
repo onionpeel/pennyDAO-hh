@@ -9,7 +9,7 @@ a) state variable
 changeDao (address)
 
 b) initialize()
-This sets the value of the changeDao address within the ChangeMaker clone.
+This sets the value of 1) the changeDao address and 2) the cloneOwner (the address that owns the ChangeMaker clone).
 
 Q1) What should be the name and symbol for the ChangeMaker NFT?
 

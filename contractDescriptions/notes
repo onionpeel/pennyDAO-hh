@@ -1,0 +1,1 @@
+1.  Some variables are public for testing.  Should they be changed to private and have the tests re-written?

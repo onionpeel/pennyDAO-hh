@@ -40,7 +40,7 @@ contract ChangeDao is Ownable, ERC721 {
 
   /* @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
   */
-  function getCommunityFundPercentage() public view returns (uint16){
+  function getCommunityFundPercentage() external view returns (uint16){
     return 10000 - (changeMakerPercentage + changeDaoPercentage);
   }
 
@@ -75,7 +75,7 @@ contract ChangeDao is Ownable, ERC721 {
     _safeMint(msg.sender, currentToken);
     changeMakerClones[currentToken] = clone;
 
-    ChangeMaker(clone).initialize(msg.sender);
+    ChangeMaker(clone).initialize(msg.sender, address(this));
   }
 
 

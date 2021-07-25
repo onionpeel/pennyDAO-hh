@@ -17,6 +17,6 @@ contract CloneGenerator {
 
   function createClone() public {
     clone = Clones.clone(changeMakerImplementation);
-    ChangeMaker(clone).initialize(msg.sender);
+    ChangeMaker(clone).initialize(msg.sender, address(this));
   }
 }

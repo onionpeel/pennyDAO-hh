@@ -3,3 +3,5 @@
 2. Will ChangeMaker and Project need an admin?
 
 3. ChangeMaker and Project do not need to be ownable because there are no functions on the implementation that need access control.  All of the access control happens for the clones, which is set in the initializer.
+
+4. Fallback/receive functions for all three contracts. 

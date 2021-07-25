@@ -25,9 +25,7 @@ contract Project is Ownable, Initializable {
   /// @param _expirationTime Project cannot receive funding after expiration
   /// @param _fundingGoal Amount required to complete the project funding
   /// @param _minimumSponsorship Sponsors must fund above the minimum amount
-  /// @param _changeMakerPercentage Sets changeMaker withdrawl percentage
-  /// @param _changeDaoPercentage Sets changeDao withdrawal percentage
-  /// @param _communityFundPercentage Sets communityFund withdrawal percentage
+  /// @param _changeDao The address of the changeDao contract
   function initialize(
     uint256 _expirationTime,
     uint256 _fundingGoal,
@@ -48,7 +46,9 @@ contract Project is Ownable, Initializable {
 
   // MINT (1155)
 
-  // WITHDRAW
+  // WITHDRAW => REQUIRE ACCESS CONTROL FOR CHANGEMAKER AND CHANGEDAO
 
   // REFUND => THIS WILL REQUIRE CHANGEDAO ADMIN ACCESS CONTROL
+
+  // DATA STRUCTURE FOR SPONSORS => USED FOR REFUNDS
 }

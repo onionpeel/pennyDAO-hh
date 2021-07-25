@@ -11,6 +11,7 @@ import "./Project.sol";
 contract ChangeMaker is ERC721, Ownable, Initializable {
   using Counters for Counters.Counter;
   Counters.Counter public projectTokenId;
+  
   address public cloneOwner;
   address public changeDao;
   address immutable projectImplementation;
@@ -24,7 +25,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
 
   /// @notice This replaces a constructor in clones
   /// @dev This function should be called immediately after the changeMaker clone is created
-  /// @param _cloneOwner The address of the cloneOwner instance that created the clone
+  /// @param _cloneOwner The address of the changeMaker that created the clone
   /// @param _changeDao The address of the changeDao instance
   function initialize(address _cloneOwner, address _changeDao) public initializer {
     cloneOwner = _cloneOwner;

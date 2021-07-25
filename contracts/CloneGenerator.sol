@@ -8,14 +8,15 @@ import "./ChangeMaker.sol";
 
 /// This is for testing only
 contract CloneGenerator {
-  address public cloneImplementation;
+  address immutable public changeMakerImplementation;
   address public clone;
 
   constructor() {
-    cloneImplementation = address(new ChangeMaker());
+    changeMakerImplementation = address(new ChangeMaker());
   }
 
   function createClone() public {
-    clone = Clones.clone(cloneImplementation);
+    clone = Clones.clone(changeMakerImplementation);
+    ChangeMaker(clone).initialize(msg.sender);
   }
 }

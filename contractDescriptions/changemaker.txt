@@ -1,6 +1,7 @@
 1. Ownable
 When the ChangeMaker contract is deployed (from withing the ChangeDao contract), the owner of the ChangeMaker contract is set as the address of the ChangeDao contract.
 
+
 2. Initialization
 The deployed ChangeMaker contract is used for generating clones.  When a clone is created it first calls an initialization function.
 
@@ -9,3 +10,15 @@ changeDao (address)
 
 b) initialize()
 This sets the value of the changeDao address within the ChangeMaker clone.
+
+Q1) What should be the name and symbol for the ChangeMaker NFT?
+
+
+3. Project
+a) state variable
+projectImplementation
+projectClones
+
+b) constructor
+i) The ChangeMaker contract is created as an ERC721 contract.
+ii) A new Project.sol contract is deployed and its address is stored as projectImplementation (this will be used to make clone contracts).

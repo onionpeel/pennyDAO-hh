@@ -113,5 +113,3 @@ xdescribe('ChangeDao.sol', () => {
     });
   });
 });
-
-// Test deployed contract and clones for address type.

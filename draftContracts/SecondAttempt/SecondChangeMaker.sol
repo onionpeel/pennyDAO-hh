@@ -10,22 +10,22 @@ import "./Project.sol";
 contract ChangeMaker is ERC721, Ownable {
   using Counters for Counters.Counter;
   Counters.Counter public projectTokenId;
-  address projectImplementation;
-  address changeDAOAddress;
-  address changeDAOAdmin;
-  bool private initialized;
+  // address projectImplementation;
+  // address changeDAOAddress;
+  // address changeDAOAdmin;
+  // bool private initialized;
   mapping (uint256 => address) public projectIdToProject;
 
-  constructor(address dai, address usdc) ERC721("ChangeMaker", "CHNGv1IMPL") {
-    projectImplementation = address(new Project(dai, usdc));
-  }
+  // constructor(address dai, address usdc) ERC721("ChangeMaker", "CHNGv1IMPL") {
+  //   projectImplementation = address(new Project(dai, usdc));
+  // }
 
-  function initialize(address _changeDAOAdmin) public {
-    require(!initialized, "Contract has already been initialized");
-    initialized = true;
-    changeDAOAddress = owner();
-    changeDAOAdmin = _changeDAOAdmin;
-  }
+  // function initialize(address _changeDAOAdmin) public {
+  //   require(!initialized, "Contract has already been initialized");
+  //   initialized = true;
+  //   changeDAOAddress = owner();
+  //   changeDAOAdmin = _changeDAOAdmin;
+  // }
 
   function createProject(
     uint256 expirationTime,

@@ -80,4 +80,6 @@ contract ChangeDao is Ownable, ERC721 {
 
 
   ///DONATION
+
+  //
 }

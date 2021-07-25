@@ -1,0 +1,3 @@
+
+
+The withdrawal percentages are set in the project along with the input from the function parameters.

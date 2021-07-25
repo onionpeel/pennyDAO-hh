@@ -8,12 +8,6 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Project.sol";
 
-interface IChangeDao {
-  function changeDaoPercentage() external view returns (uint16);
-  function changeMakerPercentage() external view returns (uint16);
-  function getCommunityFundPercentage() external view returns (uint16);
-}
-
 contract ChangeMaker is ERC721, Ownable, Initializable {
   using Counters for Counters.Counter;
   Counters.Counter public projectTokenId;
@@ -58,20 +52,14 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     /// @notice Mint changeMaker's new project NFT that maps to the project clone
     _safeMint(msg.sender, currentToken);
     projectClones[currentToken] = clone;
-    /// @notice Set the project's withdrawal percentages
-    uint16 changeMakerPercentage = IChangeDao(changeDao).changeMakerPercentage();
-    uint16 changeDaoPercentage = IChangeDao(changeDao).changeDaoPercentage();
-    uint16 communityFundPercentage = IChangeDao(changeDao).getCommunityFundPercentage();
 
     Project(clone).initialize(
       _expirationTime,
       _fundingGoal,
       _minimumSponsorship,
-      changeMakerPercentage,
-      changeDaoPercentage,
-      communityFundPercentage
+      changeDao
     );
   }
 
-  // Donation 
+  // Donation
 }

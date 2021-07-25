@@ -29,4 +29,3 @@ c) createProject()
 parameters: i) expirationTime, ii) fundingGoal, iii) minimumSponsorship
 A changeMaker calls this function to create a project clone based on the function parameters.
 A new NFT is created that connects the changeMaker to the project clone.
-The withdrawal percentages are set in the project along with the input from the function parameters.

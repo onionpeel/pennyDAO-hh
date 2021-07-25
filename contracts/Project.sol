@@ -4,10 +4,18 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface IChangeDao {
+  function changeDaoPercentage() external view returns (uint16);
+  function changeMakerPercentage() external view returns (uint16);
+  function getCommunityFundPercentage() external view returns (uint16);
+}
+
 contract Project is Ownable, Initializable {
   uint256 expirationTime;
   uint256 fundingGoal;
   uint256 minimumSponsorship;
+  address changeDao;
+
   uint16 changeMakerPercentage;
   uint16 changeDaoPercentage;
   uint16 communityFundPercentage;
@@ -24,19 +32,21 @@ contract Project is Ownable, Initializable {
     uint256 _expirationTime,
     uint256 _fundingGoal,
     uint256 _minimumSponsorship,
-    uint16 _changeMakerPercentage,
-    uint16 _changeDaoPercentage,
-    uint16 _communityFundPercentage
+    address _changeDao
   ) public initializer {
     expirationTime = _expirationTime;
     fundingGoal = _fundingGoal;
     minimumSponsorship = _minimumSponsorship;
-    changeMakerPercentage = _changeMakerPercentage;
-    changeDaoPercentage = _changeDaoPercentage;
-    communityFundPercentage = _communityFundPercentage;
+    changeDao = _changeDao;
+    /// @notice Set the project's withdrawal percentages
+    changeMakerPercentage = IChangeDao(changeDao).changeMakerPercentage();
+    changeDaoPercentage = IChangeDao(changeDao).changeDaoPercentage();
+    communityFundPercentage = IChangeDao(changeDao).getCommunityFundPercentage();
   }
 
   // FUND
+
+  // MINT (1155)
 
   // WITHDRAW
 

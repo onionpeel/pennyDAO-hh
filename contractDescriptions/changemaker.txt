@@ -6,7 +6,8 @@ When the ChangeMaker contract is deployed (from withing the ChangeDao contract),
 The deployed ChangeMaker contract is used for generating clones.  When a clone is created it first calls an initialization function.
 
 a) state variable
-changeDao (address)
+changeDao
+cloneOwner
 
 b) initialize()
 This sets the value of 1) the changeDao address and 2) the cloneOwner (the address that owns the ChangeMaker clone).
@@ -18,7 +19,14 @@ Q1) What should be the name and symbol for the ChangeMaker NFT?
 a) state variable
 projectImplementation
 projectClones
+projectTokenId
 
 b) constructor
 i) The ChangeMaker contract is created as an ERC721 contract.
 ii) A new Project.sol contract is deployed and its address is stored as projectImplementation (this will be used to make clone contracts).
+
+c) createProject()
+parameters: i) expirationTime, ii) fundingGoal, iii) minimumSponsorship
+A changeMaker calls this function to create a project clone based on the function parameters.
+A new NFT is created that connects the changeMaker to the project clone.
+The withdrawal percentages are set in the project along with the input from the function parameters.

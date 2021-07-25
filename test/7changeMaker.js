@@ -72,5 +72,10 @@ describe('ChangeMaker.sol', () => {
     });
   });
 
-  
+  describe('Project', () => {
+    it('createProject(): changeMaker creates new project', async () => {
+      
+    });
+  });
+
 });

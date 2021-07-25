@@ -1,1 +1,5 @@
 1.  Some variables are public for testing.  Should they be changed to private and have the tests re-written?
+
+2. Will ChangeMaker and Project need an admin?
+
+3. ChangeMaker and Project do not need to be ownable because there are no functions on the implementation that need access control.  All of the access control happens for the clones, which is set in the initializer.

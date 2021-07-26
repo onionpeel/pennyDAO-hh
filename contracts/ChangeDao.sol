@@ -10,7 +10,7 @@ import "./ChangeMaker.sol";
 contract ChangeDao is Ownable, ERC721 {
   using Counters for Counters.Counter;
   Counters.Counter public changeMakerTokenId;
-  address immutable changeMakerImplementation;
+  address immutable public changeMakerImplementation;
   ///Percentages are stored using basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
@@ -81,5 +81,4 @@ contract ChangeDao is Ownable, ERC721 {
 
   ///DONATION
 
-  //
 }

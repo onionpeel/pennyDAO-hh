@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./ChangeMaker.sol";
 
 /// This is for testing only
+/// CMCloneGenerator = ChangeDao.sol
 contract CMCloneGenerator {
   address immutable public changeMakerImplementation;
   address public clone;

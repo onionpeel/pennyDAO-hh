@@ -11,7 +11,7 @@ import "./Project.sol";
 contract ChangeMaker is ERC721, Ownable, Initializable {
   using Counters for Counters.Counter;
   Counters.Counter public projectTokenId;
-  
+
   address public cloneOwner;
   address public changeDao;
   address immutable projectImplementation;
@@ -58,7 +58,8 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
       _expirationTime,
       _fundingGoal,
       _minimumSponsorship,
-      changeDao
+      changeDao,
+      msg.sender
     );
   }
 

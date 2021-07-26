@@ -1,3 +1,27 @@
+Each project is a clone of Project.sol.  These clones are created when a changeMaker calls createProject() in ChangeMaker.sol.
 
+1. Initialization
+a) state variables
+expirationTime
+fundingGoal
+minimumSponsorship
+changeDao
+owner
+changeMakerPercentage
+changeDaoPercentage
+communityFundPercentage
 
-The withdrawal percentages are set in the project along with the input from the function parameters.
+b) initialize()
+This function is called by a changeMaker clone and it sets the project's state variables.
+
+2. Fund
+fund() TODO
+
+3. Refund
+refund() TODO
+
+4. Withdraw funding shares
+Each function will withdraw a percentage of the project based on the rates set by changeDao.
+a) withdrawChangemakerShare() TODO
+b) withdrawChangeDaoShare() TODO
+c) withdrawCommunityFundShare() TODO

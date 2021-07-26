@@ -24,7 +24,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   }
 
   /// @notice This replaces a constructor in clones
-  /// @dev This function should be called immediately after the changeMaker clone is created
+  /// @dev This function is called immediately after the changeMaker clone is created
   /// @param _cloneOwner The address of the changeMaker that created the clone
   /// @param _changeDao The address of the changeDao instance
   function initialize(address _cloneOwner, address _changeDao) public initializer {
@@ -33,7 +33,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   }
 
   /// @notice A changeMaker creates a new project
-  /// @dev Only the changeMaker that is the owner of its clone can call this function
+  /// @dev Only the changeMaker that is the clone owner can call this function
   /// @param _expirationTime Project cannot receive funding after expiration
   /// @param _fundingGoal Amount required to complete the project funding
   /// @param _minimumSponsorship Sponsors must fund above the minimum amount
@@ -62,6 +62,8 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
       msg.sender
     );
   }
+
+  /// *********** EVERYTHING BELOW IS UNFINISHED **************************
 
   // Donation
 }

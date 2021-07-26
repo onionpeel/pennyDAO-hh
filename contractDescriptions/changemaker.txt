@@ -1,3 +1,5 @@
+An instance of ChangeMaker.sol is created withing ChangeDao.sol.  This changeMaker instance is used to create clones whenever an organization registers as a changeMaker.
+
 1. Ownable
 When the ChangeMaker contract is deployed (from withing the ChangeDao contract), the owner of the ChangeMaker contract is set as the address of the ChangeDao contract.
 

@@ -27,6 +27,7 @@ contract Project is Initializable {
   /// @param _fundingGoal Amount required to complete the project funding
   /// @param _minimumSponsorship Sponsors must fund above the minimum amount
   /// @param _changeDao The address of the changeDao contract
+  /// @param _owner The changeMaker address that is the owner of the project clone
   function initialize(
     uint256 _expirationTime,
     uint256 _fundingGoal,
@@ -50,8 +51,9 @@ contract Project is Initializable {
 
 
 
-  /// *********** EVERYTHING BELOW IS NOT FINISHED **************************
+  /// *********** EVERYTHING BELOW IS UNFINISHED **************************
 
+  /// @notice Restricts access to the changeDao owner
   modifier onlyChangeDao() {
     require(msg.sender == IChangeDao(changeDao).owner(),
       "Only changeDao owner can call this function");
@@ -63,18 +65,18 @@ contract Project is Initializable {
 
   }
 
-  /// @notice The owner of the changeMaker clone calls to receive funding share
+  /// @notice The owner of the changeMaker clone calls to withdraw funding share
   function withdrawChangemakerShare() public {
     require(msg.sender == owner, "Only changeMaker project owner can call function");
 
   }
 
-  /// @notice The owner of the changeDao instance calls to receive funding share
+  /// @notice The owner of the changeDao instance calls to withdraw funding share
   function withdrawChangeDaoShare() public onlyChangeDao {
 
   }
 
-  /// @notice The owner of the changeDao instance calls to receive funding share
+  /// @notice The owner of the changeDao instance calls to withdraw funding share
   function withdrawCommunityFundShare() public onlyChangeDao {
 
   }

@@ -1,3 +1,5 @@
+ChangeDao.sol is the root contract.  It mediates the creation of changeMaker clone contracts, which, in turn, mediate the creation of project clones.  
+
 1. Ownable
 The contract is Ownable so that the address which deploys this contract will have access control over any functions with the modifier, onlyOwner.
 
@@ -56,4 +58,5 @@ Q4) Should the first NFT token value be 0 or 1?
 
 
 5. Donation
+a) donate()
 Todo...

@@ -11,7 +11,7 @@ contract ChangeDao is Ownable, ERC721 {
   using Counters for Counters.Counter;
   Counters.Counter public changeMakerTokenId;
   address immutable public changeMakerImplementation;
-  ///Percentages are stored using basis points
+  ///Percentages are stored as basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
 
@@ -26,7 +26,7 @@ contract ChangeDao is Ownable, ERC721 {
   }
 
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
-  /// @dev Only the contract owner can call this function
+  /// @dev Only the contract owner (changeDao) can call this function
   /// @param _newChangeMaker The address that will be added to the mapping of approved changemakers
   function approveNewChangeMaker(address _newChangeMaker) public onlyOwner {
     approvedChangeMakers[_newChangeMaker] = true;
@@ -38,13 +38,12 @@ contract ChangeDao is Ownable, ERC721 {
     approvedChangeMakers[_changeMaker] = false;
   }
 
-  /* @notice In order to save on storage, the communityFundPercentage is not a variable like the others.  Instead, it is calculated whenever it is needed based on the other two percentages.
-  */
+  /* @notice In order to save on storage, the communityFundPercentage is not a variable.  Instead, it is calculated whenever it is needed based on the other two percentages.*/
   function getCommunityFundPercentage() external view returns (uint16){
     return 10000 - (changeMakerPercentage + changeDaoPercentage);
   }
 
-  /// @notice All percentages must be expressed as basis points (9675 => 96.75%)
+  /// @notice All percentages must be expressed as basis points (96.75% => 9675)
   /// @param _changeMakerPercentage changeMaker share
   /// @param _changeDaoPercentage changeDao share
   /// @param _communityFundPercentage communityFund share
@@ -62,8 +61,7 @@ contract ChangeDao is Ownable, ERC721 {
   }
 
   /// @notice Approved changeMakers can register
-  /* @dev A clone from the changeMakerImplementation is created. An NFT is minted for the changeMaker's address.  The clone is mapped to the changeMaker's NFT token id.  Then the clone is initialized.
-  */
+  /* @dev A clone from the changeMakerImplementation is created. An NFT is minted for the changeMaker's address.  The clone is mapped to the changeMaker's NFT token id.  Then the clone is initialized.*/
   function register() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
@@ -78,6 +76,7 @@ contract ChangeDao is Ownable, ERC721 {
     ChangeMaker(clone).initialize(msg.sender, address(this));
   }
 
+  /// *********** EVERYTHING BELOW IS UNFINISHED **************************
 
   ///DONATION
 

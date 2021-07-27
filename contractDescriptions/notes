@@ -5,3 +5,6 @@
 3. ChangeMaker does not need to be ownable because there are no functions on the implementation that need access control.  All of the access control happens for the clones, which is set in the initializer.
 
 4. Fallback/receive functions for all three contracts.
+
+5.  1155
+a) Which ERC1155 contract should we use?  Do we need to be able to pause transfers => ERC1155PresetMinterPauser

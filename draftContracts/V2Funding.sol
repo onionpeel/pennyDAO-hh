@@ -11,15 +11,27 @@ contract V2Funding {
     fundingSystem = _fundingSystem;
   }
 
-  function directFund() public {
+  function fund() public {
+    if(fundingSystem == FundingSystem.DirectFunding) {
+      _directFund();
+    } else if {
+      if(fundingSystem == FundingSystem.Auction) {
+        _makeAuctionBid()();
+    } else {
+      _crowdFund();
+    }
+  }
+
+
+  function _directFund() private {
     require(fundingSystem == 1, "Funding system must be DirectFunding");
   }
 
-  function makeAuctionBid() public {
+  function _makeAuctionBid() private {
     require(fundingSystem == 2, "Funding system must be Auction");
   }
 
-  function crowdFund() public {
+  function _crowdFund() private {
     require(fundingSystem == 3, "Funding system must be CrowdFunding");
   }
 }

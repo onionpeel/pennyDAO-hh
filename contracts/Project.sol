@@ -69,6 +69,7 @@ contract Project is Initializable {
   }
 
   function terminateProject() public {
+    require(msg.sender == changeDao || msg.sender == owner, "Not authorized to terminate project");
     
   }
 

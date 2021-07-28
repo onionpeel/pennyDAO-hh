@@ -87,15 +87,12 @@ contract Project is ERC721URIStorage, Initializable {
   function directFund(address _token, uint256 _amount) public {
     /// @notice Check that project NFTs remain to be minted
     require(mintTotal > sponsorId, "Unable to fund. All tokens have already been minted");
-    /// @notice Check that the funding amount is equal or greater than the required minimum
-    uint256 amountInDai = fundingClone.convertToDai(_amount);
-
-  }
-
-  /// @notice NFT minting for project sponsors
-  function _mint() private {
+    /// @notice Checks that funding was successful
+    require(projectClone.fund(_token, _amount, mintPrice));
+    /// @notice Update sponsorId
     sponsorId.increment();
     uint currentToken = sponsorId.current();
+    /// @notice Mint project NFT to msg.sender
     _safeMint(msg.sender, currentToken);
     _setTokenURI(currentToken, tokenCid);
   }

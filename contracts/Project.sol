@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
+import "./Funding.sol";
 
 interface IChangeDao {
   function changeDaoPercentage() external view returns (uint16);
@@ -20,15 +22,15 @@ interface IChangeMaker {
 contract Project is ERC721URIStorage, Initializable {
   using Counters for Counters.counter;
 
-  uint mintPrice;
-  uint mintTotal;
-  address public owner;
-  string tokenCid;
-  uint16 changeMakerPercentage;
-  uint16 changeDaoPercentage;
-  uint16 communityFundPercentage;
-
-  Counters sponsorId;
+  uint256 mintPrice; // changeMaker sets price
+  uint256 mintTotal; // changeMaker sets total mints
+  address public owner; // access control
+  uint16 changeMakerPercentage; // funding withdrawal
+  uint16 changeDaoPercentage; // funding withdrawal
+  uint16 communityFundPercentage; // funding withdrawal
+  address fundingClone; // Address of clone
+  string tokenCid; // NFT minting
+  Counters sponsorId; // NFT minting
 
   /// @notice This replaces a constructor in clones
   /// @dev This function should be called immediately after the project clone is created
@@ -39,8 +41,8 @@ contract Project is ERC721URIStorage, Initializable {
   /// @param _tokenCid The cid that is used for setting the token URI
   /// @param _owner The changeMaker address that is the owner of the project clone
   function initialize(
-    uint _mintPrice,
-    uint _mintTotal,
+    uint256 _mintPrice, // expressed in DAI
+    uint256 _mintTotal,
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid,
@@ -62,6 +64,10 @@ contract Project is ERC721URIStorage, Initializable {
     changeMakerPercentage = IChangeDao(changeDao).changeMakerPercentage();
     changeDaoPercentage = IChangeDao(changeDao).changeDaoPercentage();
     communityFundPercentage = IChangeDao(changeDao).getCommunityFundPercentage();
+
+    address fundingImplementation = address(new Funding());
+    fundingClone = Clones.clone(fundingImplementation);
+    Funding(fundingClone).initialize();
   }
 
 
@@ -70,15 +76,19 @@ contract Project is ERC721URIStorage, Initializable {
   1. receive amount:
   a) erc20 stablecoin
   b) eth
-  2. Check that the mintTotal set by the changemaker is greater than the number of NFTs that have been minted.
+  *2. Check that the mintTotal set by the changemaker is greater than the number of NFTs that have been minted.
   3. Check that the amount is greater than the mintPrice set by the changemaker. This will require conversions to DAI? from other stablecoins and eth
   3. Divide the amount based on percentages for changemaker, changedao, and community fund
   4. Distribute the divided amounts to those three parties
   5. Mint NFT for the address that sent the funds
   */
 
-  /// @notice Sponsors send funds to the project and receive an NFT 
-  function fund() public {
+  /// @notice Sponsors send funds to the project and receive an NFT
+  function directFund(address _token, uint256 _amount) public {
+    /// @notice Check that project NFTs remain to be minted
+    require(mintTotal > sponsorId, "Unable to fund. All tokens have already been minted");
+    /// @notice Check that the funding amount is equal or greater than the required minimum
+    uint256 amountInDai = fundingClone.convertToDai(_amount);
 
   }
 

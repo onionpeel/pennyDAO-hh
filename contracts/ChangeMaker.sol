@@ -38,8 +38,8 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   /// @param _fundingGoal Amount required to complete the project funding
   /// @param _minimumSponsorship Sponsors must fund above the minimum amount
   function createProject(
-    uint _mintPrice,
-    uint _mintTotal,
+    uint256 _mintPrice,
+    uint256 _mintTotal,
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid

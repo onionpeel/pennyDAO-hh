@@ -11,9 +11,9 @@ interface IChangeDao {
 }
 
 contract Project is Initializable {
-  uint256 expirationTime;
-  uint256 fundingGoal;
-  uint256 minimumSponsorship;
+  uint mintPrice;
+  uint mintTotal;
+
   address changeDao;
   address public owner;
 
@@ -29,18 +29,16 @@ contract Project is Initializable {
   /// @param _changeDao The address of the changeDao contract
   /// @param _owner The changeMaker address that is the owner of the project clone
   function initialize(
-    uint256 _expirationTime,
-    uint256 _fundingGoal,
-    uint256 _minimumSponsorship,
+    uint mintPrice,
+    uint mintTotal,
     address _changeDao,
     address _owner
   )
     public
     initializer
   {
-    expirationTime = _expirationTime;
-    fundingGoal = _fundingGoal;
-    minimumSponsorship = _minimumSponsorship;
+    mintPrice = _mintPrice;
+    mintTotal = _mintTotal;
     changeDao = _changeDao;
     owner = _owner;
     /// @notice Set the project's withdrawal percentages
@@ -50,40 +48,28 @@ contract Project is Initializable {
   }
 
 
+  // Direct funding model
+  /* Flow within fund()
+  1. receive amount:
+  a) erc20 stablecoin
+  b) eth
+  2. Check that the mintTotal set by the changemaker is greater than the number of NFTs that have been minted.
+  3. Check that the amount is greater than the mintPrice set by the changemaker.
+  3. Divide the amount based on percentages for changemaker, changedao, and community fund
+  4. Distribute the divided amounts to those three parties
+  5. Mint NFT for the address that sent the funds
+  */
 
-  /// *********** EVERYTHING BELOW IS UNFINISHED **************************
-
-  /// @notice Restricts access to the changeDao owner
-  modifier onlyChangeDao() {
-    require(msg.sender == IChangeDao(changeDao).owner(),
-      "Only changeDao owner can call this function");
-    _;
-  }
-
-  /// @notice ChangeDao owner can return all funds to sponsors
-  function refund() public onlyChangeDao {
-
-  }
-
-  /// @notice The owner of the changeMaker clone calls to withdraw funding share
-  function withdrawChangemakerShare() public {
-    require(msg.sender == owner, "Only changeMaker project owner can call function");
+  function fund() public {
 
   }
 
-  /// @notice The owner of the changeDao instance calls to withdraw funding share
-  function withdrawChangeDaoShare() public onlyChangeDao {
+  function mint() public{
 
   }
 
-  /// @notice The owner of the changeDao instance calls to withdraw funding share
-  function withdrawCommunityFundShare() public onlyChangeDao {
-
+  function terminateProject() public {
+    
   }
 
-  // FUND => fund()
-
-  // MINT (1155) => mintProjectTokens()
-
-  // DATA STRUCTURE FOR SPONSORS => USED FOR REFUNDS
 }

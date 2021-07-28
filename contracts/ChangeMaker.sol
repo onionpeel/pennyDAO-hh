@@ -67,6 +67,13 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     );
   }
 
+
+  function getChangeDaoAddress() external view returns (address) {
+    return changeDao;
+    /// CAN THIS BE DONE WITH:
+    /// RETURN OWNER()
+  };
+
   /// *********** EVERYTHING BELOW IS UNFINISHED **************************
 
   // Donation

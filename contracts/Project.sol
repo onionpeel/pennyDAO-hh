@@ -6,19 +6,22 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-interface IChangeDao is ERC721URIStorage, Initializable {
+interface IChangeDao {
   function changeDaoPercentage() external view returns (uint16);
   function changeMakerPercentage() external view returns (uint16);
   function getCommunityFundPercentage() external view returns (uint16);
   function owner() external view returns (address);
 }
 
-contract Project is Initializable {
+interface IChangeMaker {
+  function getChangeDaoAddress() external view returns (address);
+}
+
+contract Project is ERC721URIStorage, Initializable {
   using Counters for Counters.counter;
 
   uint mintPrice;
   uint mintTotal;
-  address changeDao;
   address public owner;
   string tokenCid;
   uint16 changeMakerPercentage;
@@ -40,7 +43,6 @@ contract Project is Initializable {
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid,
-    address _changeDao,
     address _owner
   )
     public
@@ -52,8 +54,9 @@ contract Project is Initializable {
     mintPrice = _mintPrice;
     mintTotal = _mintTotal;
     tokenCid = _tokenCid;
-    changeDao = _changeDao;
     owner = _owner;
+
+    address changeDao = IChangeMaker(msg.sender).getChangeDaoAddress();
     /// @notice Set the project's withdrawal percentages
     changeMakerPercentage = IChangeDao(changeDao).changeMakerPercentage();
     changeDaoPercentage = IChangeDao(changeDao).changeDaoPercentage();

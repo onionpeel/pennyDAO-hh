@@ -32,10 +32,11 @@ contract Project is ERC721URIStorage, Initializable {
 
   /// @notice This replaces a constructor in clones
   /// @dev This function should be called immediately after the project clone is created
-  /// @param _expirationTime Project cannot receive funding after expiration
-  /// @param _fundingGoal Amount required to complete the project funding
-  /// @param _minimumSponsorship Sponsors must fund above the minimum amount
-  /// @param _changeDao The address of the changeDao contract
+  /// @param _mintPrice Minimum amount to fund a project and mint a token
+  /// @param _mintTotal Total number of tokens that the project will mint
+  /// @param _tokenName ChangeMaker sets the token name
+  /// @param _tokenSymbol ChangeMaker sets the token symbol
+  /// @param _tokenCid The cid that is used for setting the token URI
   /// @param _owner The changeMaker address that is the owner of the project clone
   function initialize(
     uint _mintPrice,
@@ -76,10 +77,12 @@ contract Project is ERC721URIStorage, Initializable {
   5. Mint NFT for the address that sent the funds
   */
 
+  /// @notice Sponsors send funds to the project and receive an NFT 
   function fund() public {
 
   }
 
+  /// @notice NFT minting for project sponsors
   function _mint() private {
     sponsorId.increment();
     uint currentToken = sponsorId.current();
@@ -87,6 +90,7 @@ contract Project is ERC721URIStorage, Initializable {
     _setTokenURI(currentToken, tokenCid);
   }
 
+  /* @notice The changeMaker and ChangeDao are authorized to terminate the project so it will no longer receive funding */
   function terminateProject() public {
     require(msg.sender == changeDao || msg.sender == owner, "Not authorized to terminate project");
     /// @notice Setting the value to zero causes fund() to revert

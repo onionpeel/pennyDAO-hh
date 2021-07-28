@@ -38,9 +38,11 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   /// @param _fundingGoal Amount required to complete the project funding
   /// @param _minimumSponsorship Sponsors must fund above the minimum amount
   function createProject(
-    uint256 _expirationTime,
-    uint256 _fundingGoal,
-    uint256 _minimumSponsorship
+    uint _mintPrice,
+    uint _mintTotal,
+    string _tokenName,
+    string _tokenSymbol,
+    string _tokenCid
   )
     public
   {
@@ -55,9 +57,11 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     projectClones[currentToken] = clone;
 
     Project(clone).initialize(
-      _expirationTime,
-      _fundingGoal,
-      _minimumSponsorship,
+      _mintPrice,
+      _mintTotal,
+      _tokenName,
+      _tokenSymbol,
+      _tokenCid,
       changeDao,
       msg.sender
     );

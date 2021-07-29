@@ -4,25 +4,7 @@
 
 3. ChangeMaker does not need to be ownable because there are no functions on the implementation that need access control.  All of the access control happens for the clones, which is set in the initializer.
 
-4. Fallback/receive functions for all three contracts.
+4. Fallback/receive functions for all contracts. Does there need to be a function to withdraw eth that ends up in a contract through the fallback/receive funtions?
 
 5.  1155
 a) Which ERC1155 contract should we use?  Do we need to be able to pause transfers => ERC1155PresetMinterPauser
-
-
-****************************
-ChangeDao.sol
-set withdrawal percentages used by project clones
-approve organizations to become changemakers
-deploy ChangeMaker.sol
-organizations create their changemaker clones
-
-ChangeMaker.sol
-deploy Project.sol
-a changemaker creates project clones
-
-Project.sol
-fund project
-refund
-withdraw funds based on set percentages
-mint

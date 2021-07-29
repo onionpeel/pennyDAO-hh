@@ -4,33 +4,26 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./Funding.sol";
 
-interface IChangeDao {
-  function changeDaoPercentage() external view returns (uint16);
-  function changeMakerPercentage() external view returns (uint16);
-  function getCommunityFundPercentage() external view returns (uint16);
-  function owner() external view returns (address);
-}
-
-interface IChangeMaker {
-  function getChangeDaoAddress() external view returns (address);
-}
 
 contract Project is ERC721URIStorage, Initializable {
   using Counters for Counters.counter;
 
-  uint256 mintPrice; // changeMaker sets price
+  uint256 mintPrice; // changeMaker sets price; expressed in DAI
   uint256 mintTotal; // changeMaker sets total mints
   address public owner; // access control
-  uint16 changeMakerPercentage; // funding withdrawal
-  uint16 changeDaoPercentage; // funding withdrawal
-  uint16 communityFundPercentage; // funding withdrawal
   address fundingClone; // Address of clone
   string tokenCid; // NFT minting
   Counters sponsorId; // NFT minting
+
+
+  ///WILL SOMETHING LIKE THIS BE NEEDED?
+  // constructor() {
+  //     // prevent the implementation contract from being initialized
+  //     goalAmount = uint256(-1);
+  // }
 
   /// @notice This replaces a constructor in clones
   /// @dev This function should be called immediately after the project clone is created
@@ -41,12 +34,14 @@ contract Project is ERC721URIStorage, Initializable {
   /// @param _tokenCid The cid that is used for setting the token URI
   /// @param _owner The changeMaker address that is the owner of the project clone
   function initialize(
-    uint256 _mintPrice, // expressed in DAI
+    uint256 _mintPrice,
     uint256 _mintTotal,
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid,
     address _owner
+    address[] memory _permittedTokens,
+
   )
     public
     initializer
@@ -54,25 +49,22 @@ contract Project is ERC721URIStorage, Initializable {
     /// SHOULD NAME/SYMBOL BE CUSTOMIZABLE????
     ERC721(_tokenName, _tokenSymbol);
 
+    require(_mintPrice > 0, "Mint price must be larger than zero");
+    require(_mintTotal > 0), "Mint total must be larger than zero)";
     mintPrice = _mintPrice;
     mintTotal = _mintTotal;
+
     tokenCid = _tokenCid;
     owner = _owner;
 
-    address changeDao = IChangeMaker(msg.sender).getChangeDaoAddress();
-    /// @notice Set the project's withdrawal percentages
-    changeMakerPercentage = IChangeDao(changeDao).changeMakerPercentage();
-    changeDaoPercentage = IChangeDao(changeDao).changeDaoPercentage();
-    communityFundPercentage = IChangeDao(changeDao).getCommunityFundPercentage();
-
     address fundingImplementation = address(new Funding());
     fundingClone = Clones.clone(fundingImplementation);
-    Funding(fundingClone).initialize();
+    Funding(fundingClone).initialize(msg.sender, _permittedTokens);
   }
 
 
   // Direct funding model
-  /* Flow within fund()
+  /* Flow within directFund()
   1. receive amount:
   a) erc20 stablecoin
   b) eth

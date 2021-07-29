@@ -1,0 +1,29 @@
+ChangeDao.sol
+  withdrawal percentages:
+  setPercentageDistributions()
+  changeMakerPercentage()
+  changeDaoPercentage()
+  getCommunityFundPercentage()
+
+  approval:
+  approveNewChangeMaker()
+  removeApproval()
+  approvedChangeMakers()
+
+  registration:
+  register()
+  changeMakerClones()
+
+
+ChangeMaker.sol
+  createProject()
+  projectClones()
+
+
+Project.sol
+  directFund()
+  terminateProject()
+
+
+Funding.sol
+  withdrawEth()

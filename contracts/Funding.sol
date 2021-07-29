@@ -3,6 +3,8 @@ pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20";
+
 
 interface Oracle {
     function latestRoundData()
@@ -30,12 +32,15 @@ interface IChangeMaker {
 
 
 contract Funding is Initializable {
+  using SafeERC20 for IERC20;
+
   address owner; // owner = project clone
   address changeMaker; // changemaker that created the project
   uint16 changeMakerPercentage; // funding withdrawal
   uint16 changeDaoPercentage; // funding withdrawal
   uint16 communityFundPercentage; // funding withdrawal
 
+  address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
   address ETH_USD_ORACLE = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
 
   EnumerableSet.AddressSet permittedTokens;
@@ -77,7 +82,7 @@ contract Funding is Initializable {
     return false;
   }
 
-  function fund(address _token, uint256 _amount, uint256 _mintPrice)
+  function fund(address _token, uint256 _amount, uint256 _mintPrice, address _sponsor)
     external
     payable
     returns (bool)
@@ -86,10 +91,10 @@ contract Funding is Initializable {
     /// @notice Check that the funding amount is equal or greater than the required minimum
     require(_isSufficientFunding(_token, _amount, _mintPrice), "Insufficient funding amount");
 
-    /* if amount is in eth:
-      uint256 changeMakerAmount = _amount * changeMakerPercentage;
-      uint256 changeDaoAmount = _amount * changeDaoPercentage;
-      uint256 communityFundAmount = _amount * communityFundPercentage;
+    /* if _token == ETH_ADDRESS:
+      uint256 changeMakerAmount = msg.value * changeMakerPercentage;
+      uint256 changeDaoAmount = msg.value * changeDaoPercentage;
+      uint256 communityFundAmount = msg.value * communityFundPercentage;
 
       ethBalances[changeMaker] += changeMakerAmount;
       ethBalances[changeDao] += changeDaoAmount;
@@ -98,7 +103,11 @@ contract Funding is Initializable {
     */
 
     if (_token == permittedTokens.contains(_token) {
+      uint256 changeMakerAmount = _amount * changeMakerPercentage;
+      uint256 changeDaoAmount = _amount * changeDaoPercentage;
+      uint256 communityFundAmount = _amount * communityFundPercentage;
 
+      IERC20(_token).safeTransferFrom(_sponsor, address(this), _amount);
     }
 
   }

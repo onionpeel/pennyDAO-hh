@@ -34,8 +34,8 @@ contract Project is ERC721URIStorage, Initializable {
   /// @param _tokenCid The cid that is used for setting the token URI
   /// @param _owner The changeMaker address that is the owner of the project clone
   function initialize(
-    uint256 _mintPrice,
-    uint256 _mintTotal,
+    uint256 public _mintPrice,
+    uint256 public _mintTotal,
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid,
@@ -80,7 +80,7 @@ contract Project is ERC721URIStorage, Initializable {
     /// @notice Check that project NFTs remain to be minted
     require(mintTotal > sponsorId, "Unable to fund. All tokens have already been minted");
     /// @notice Checks that funding was successful
-    require(projectClone.fund(_token, _amount, mintPrice));
+    require(projectClone.fund(_token, _amount, mintPrice, msg.sender));
     /// @notice Update sponsorId
     sponsorId.increment();
     uint currentToken = sponsorId.current();

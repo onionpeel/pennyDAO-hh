@@ -59,7 +59,7 @@ contract Project is ERC721URIStorage, Initializable {
 
     address fundingImplementation = address(new Funding());
     fundingClone = Clones.clone(fundingImplementation);
-    Funding(fundingClone).initialize(msg.sender, _permittedTokens);
+    Funding(fundingClone).initialize(msg.sender, _owner, _permittedTokens);
   }
 
 

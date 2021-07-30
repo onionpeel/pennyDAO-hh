@@ -14,7 +14,7 @@ contract ChangeDao is Ownable, ERC721 {
   ///Percentages are stored as basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
-  address payable communityFund;
+  address payable public communityFundAddress;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
@@ -22,9 +22,9 @@ contract ChangeDao is Ownable, ERC721 {
   mapping (uint256 => address) public changeMakerClones;
 
   /// @notice ChangeDao is deployed as an ERC721 contract
-  constructor(address payable _communityFund) ERC721('ChangeDAO', 'CHNDv1IMPL') {
-    communityFund = _communityFund;
-    changeMakerImplementation = address(new ChangeMaker());
+  constructor(address payable _communityFundAddress) ERC721('ChangeDAO', 'CHNDv1IMPL') {
+    communityFundAddress = _communityFundAddress;
+    changeMakerImplementation = address(new ChangeMaker(address(this)));
   }
 
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
@@ -73,10 +73,11 @@ contract ChangeDao is Ownable, ERC721 {
 
     changeMakerTokenId.increment();
     uint256 currentToken = changeMakerTokenId.current();
+
     _safeMint(msg.sender, currentToken);
     changeMakerClones[currentToken] = clone;
 
-    ChangeMaker(clone).initialize(msg.sender, address(this));
+    ChangeMaker(clone).initialize(msg.sender;
   }
 
   /// *********** EVERYTHING BELOW IS UNFINISHED **************************

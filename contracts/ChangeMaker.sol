@@ -12,31 +12,33 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   using Counters for Counters.Counter;
   Counters.Counter public projectTokenId;
 
-  address public cloneOwner;
-  address public changeDao;
+  address public changeMakerCloneOwner;
+  address public changeDaoContractAddress;
   address immutable projectImplementation;
 
   /// @notice Maps NFT project token id to project clone
   mapping (uint256 => address) public projectClones;
 
-  constructor() ERC721('ChangeMaker', 'CHNMKR') {
+  constructor(address _changeDaoContractAddress) ERC721('ChangeMaker', 'CHNMKR') {
+    changeDaoContractAddress = _changeDaoContractAddress;
     projectImplementation = address(new Project());
   }
 
   /// @notice This replaces a constructor in clones
   /// @dev This function is called immediately after the changeMaker clone is created
-  /// @param _cloneOwner The address of the changeMaker that created the clone
-  /// @param _changeDao The address of the changeDao instance
-  function initialize(address _cloneOwner, address _changeDao) public initializer {
-    cloneOwner = _cloneOwner;
-    changeDao = _changeDao;
+  /// @param _changeMakerCloneloneOwner The address of the changeMaker that created the clone
+  /// @param _changeDaoContractAddress The address of the changeDaoContractAddress instance
+  function initialize(address _changeMakerCloneOwner, address _changeDaoAddress) public initializer {
+    changeMakerCloneOwner = _changeMakerCloneOwner;
   }
 
   /// @notice A changeMaker creates a new project
   /// @dev Only the changeMaker that is the clone owner can call this function
-  /// @param _expirationTime Project cannot receive funding after expiration
-  /// @param _fundingGoal Amount required to complete the project funding
-  /// @param _minimumSponsorship Sponsors must fund above the minimum amount
+  /// @param _mintPrice Minimum amount to fund a project and mint a token
+  /// @param _mintTotal Total number of tokens that the project will mint
+  /// @param _tokenName ChangeMaker sets the token name
+  /// @param _tokenSymbol ChangeMaker sets the token symbol
+  /// @param _tokenCid The cid that is used for setting the token URI
   function createProject(
     uint256 _mintPrice,
     uint256 _mintTotal,
@@ -46,15 +48,15 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   )
     public
   {
-    require(msg.sender == cloneOwner, "Only clone owner can create projects");
+    require(msg.sender == changeMakerCloneOwner, "Only clone owner can create projects");
     /// @notice Create project clone
-    address clone = Clones.clone(projectImplementation);
+    address projectClone = Clones.clone(projectImplementation);
     /// @notice Increment project token id
     projectTokenId.increment();
     uint256 currentToken = projectTokenId.current();
     /// @notice Mint changeMaker's new project NFT that maps to the project clone
     _safeMint(msg.sender, currentToken);
-    projectClones[currentToken] = clone;
+    projectClones[currentToken] = projectClone;
 
     Project(clone).initialize(
       _mintPrice,
@@ -62,17 +64,16 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
       _tokenName,
       _tokenSymbol,
       _tokenCid,
-      changeDao,
-      msg.sender
+      msg.sender // EOA of a changeMaker
     );
   }
 
-
-  function getChangeDaoAddress() external view returns (address) {
-    return changeDao;
+// ????????????????????????????????????
+  function getChangeDaoOwnerAddress() external view returns (address) {
+    return changeDaoOwnerAddress;
     /// CAN THIS BE DONE WITH:
     /// RETURN OWNER()
-  };
+  }
 
   /// *********** EVERYTHING BELOW IS UNFINISHED **************************
 

@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+
 import "./Funding.sol";
 
 
@@ -13,7 +14,7 @@ contract Project is ERC721URIStorage, Initializable {
 
   uint256 mintPrice; // changeMaker sets price; expressed in DAI
   uint256 mintTotal; // changeMaker sets total mints
-  address public owner; // access control
+  address public projectOwner; // access control
   address fundingClone; // Address of clone
   string tokenCid; // NFT minting
   Counters sponsorId; // NFT minting
@@ -32,16 +33,14 @@ contract Project is ERC721URIStorage, Initializable {
   /// @param _tokenName ChangeMaker sets the token name
   /// @param _tokenSymbol ChangeMaker sets the token symbol
   /// @param _tokenCid The cid that is used for setting the token URI
-  /// @param _owner The changeMaker address that is the owner of the project clone
+  /// @param _projectOwner The changeMaker address that is the projectOwner of the project clone
   function initialize(
     uint256 public _mintPrice,
     uint256 public _mintTotal,
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid,
-    address _owner
-    address[] memory _permittedTokens,
-
+    address _projectOwner
   )
     public
     initializer
@@ -55,11 +54,11 @@ contract Project is ERC721URIStorage, Initializable {
     mintTotal = _mintTotal;
 
     tokenCid = _tokenCid;
-    owner = _owner;
+    projectOwner = _projectOwner;
 
     address fundingImplementation = address(new Funding());
     fundingClone = Clones.clone(fundingImplementation);
-    Funding(fundingClone).initialize(msg.sender, _owner, _permittedTokens);
+    Funding(fundingClone).initialize(msg.sender, _projectOwner, _permittedTokens);
   }
 
 
@@ -91,7 +90,8 @@ contract Project is ERC721URIStorage, Initializable {
 
   /* @notice The changeMaker and ChangeDao are authorized to terminate the project so it will no longer receive funding */
   function terminateProject() public {
-    require(msg.sender == changeDao || msg.sender == owner, "Not authorized to terminate project");
+    require(msg.sender == changeDao || msg.sender == projectOwner,
+      "Not authorized to terminate project");
     /// @notice Setting the value to zero causes fund() to revert
     mintTotal = 0;
   }

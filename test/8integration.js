@@ -111,15 +111,16 @@ describe('Integration', () => {
 
 
       // changeMaker.owner = changeDao
-      let cmImp = await changeDao.changeMakerImplementation();
+      let changeMakerImplementationAddress = await changeDao.changeMakerImplementation();
       const { interface } = await ethers.getContractFactory('ChangeMaker');
-      changeMakerClone1 = new ethers.Contract(
-        cmImp,
+      changeMakerContract = new ethers.Contract(
+        changeMakerImplementationAddress,
         interface,
         organization1
       );
-      let owner = await changeMakerClone1.owner();
-      console.log(owner)
+      let changeMakerContractOwner = await changeMakerContract.owner();
+      expect(changeMakerContract).to.equal(changeDao.address);
+      console.log(changeMakerContract)
       console.log(changeDao.address)
 
 

@@ -5,16 +5,15 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-
 import "./Funding.sol";
 
 
 contract Project is ERC721URIStorage, Initializable {
-  using Counters for Counters.counter;
+  using Counters for Counters.Counter;
 
   uint256 mintPrice; // changeMaker sets price; expressed in DAI
   uint256 mintTotal; // changeMaker sets total mints
-  address public projectOwner; // access control
+  address public changeMakerCloneOwner; // access control; changeMaker clone that created the project
   address fundingClone; // Address of clone
   string tokenCid; // NFT minting
   Counters sponsorId; // NFT minting
@@ -33,14 +32,14 @@ contract Project is ERC721URIStorage, Initializable {
   /// @param _tokenName ChangeMaker sets the token name
   /// @param _tokenSymbol ChangeMaker sets the token symbol
   /// @param _tokenCid The cid that is used for setting the token URI
-  /// @param _projectOwner The changeMaker address that is the projectOwner of the project clone
+  /// @param _changeMakerCloneOwner The changeMaker address that is the owner of the project clone
   function initialize(
-    uint256 public _mintPrice,
-    uint256 public _mintTotal,
+    uint256 _mintPrice,
+    uint256 _mintTotal,
     string _tokenName,
     string _tokenSymbol,
     string _tokenCid,
-    address _projectOwner
+    address _changeMakerCloneOwner //the changeMaker clone that is creating this project
   )
     public
     initializer
@@ -49,16 +48,16 @@ contract Project is ERC721URIStorage, Initializable {
     ERC721(_tokenName, _tokenSymbol);
 
     require(_mintPrice > 0, "Mint price must be larger than zero");
-    require(_mintTotal > 0), "Mint total must be larger than zero)";
+    require(_mintTotal > 0, "Mint total must be larger than zero");
     mintPrice = _mintPrice;
     mintTotal = _mintTotal;
 
     tokenCid = _tokenCid;
-    projectOwner = _projectOwner;
+    changeMakerCloneOwner = _changeMakerCloneOwner;
 
     address fundingImplementation = address(new Funding());
     fundingClone = Clones.clone(fundingImplementation);
-    Funding(fundingClone).initialize(msg.sender, _projectOwner, _permittedTokens);
+    Funding(fundingClone).initialize(msg.sender, _changeMakerCloneOwner, _permittedTokens);
   }
 
 
@@ -90,7 +89,7 @@ contract Project is ERC721URIStorage, Initializable {
 
   /* @notice The changeMaker and ChangeDao are authorized to terminate the project so it will no longer receive funding */
   function terminateProject() public {
-    require(msg.sender == changeDao || msg.sender == projectOwner,
+    require(msg.sender == changeDao || msg.sender == changeMakerCloneOwner,
       "Not authorized to terminate project");
     /// @notice Setting the value to zero causes fund() to revert
     mintTotal = 0;

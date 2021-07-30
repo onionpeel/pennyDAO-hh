@@ -13,21 +13,20 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   Counters.Counter public projectTokenId;
 
   address public changeMakerCloneOwner;
-  address public changeDaoContractAddress;
+  address public changeDaoContract;
   address immutable projectImplementation;
 
   /// @notice Maps NFT project token id to project clone
   mapping (uint256 => address) public projectClones;
 
-  constructor(address _changeDaoContractAddress) ERC721('ChangeMaker', 'CHNMKR') {
-    changeDaoContractAddress = _changeDaoContractAddress;
+  constructor(address _changeDaoContract) ERC721('ChangeMaker', 'CHNMKR') {
+    changeDaoContract = _changeDaoContract;
     projectImplementation = address(new Project());
   }
 
   /// @notice This replaces a constructor in clones
   /// @dev This function is called immediately after the changeMaker clone is created
-  /// @param _changeMakerCloneloneOwner The address of the changeMaker that created the clone
-  /// @param _changeDaoContractAddress The address of the changeDaoContractAddress instance
+  /// @param _changeMakerCloneOwner The address of the changeMaker that created the clone
   function initialize(address _changeMakerCloneOwner, address _changeDaoAddress) public initializer {
     changeMakerCloneOwner = _changeMakerCloneOwner;
   }
@@ -64,15 +63,8 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
       _tokenName,
       _tokenSymbol,
       _tokenCid,
-      msg.sender // EOA of a changeMaker
+      address(this) // Address of the changeMaker clone that is creating this project
     );
-  }
-
-// ????????????????????????????????????
-  function getChangeDaoOwnerAddress() external view returns (address) {
-    return changeDaoOwnerAddress;
-    /// CAN THIS BE DONE WITH:
-    /// RETURN OWNER()
   }
 
   /// *********** EVERYTHING BELOW IS UNFINISHED **************************

@@ -6,4 +6,4 @@
 
 4. Fallback/receive functions for all contracts. Does there need to be a function to withdraw eth that ends up in a contract through the fallback/receive funtions?
 
-5. Are the funding types only eth, usdc and dai?  
+5. changeDaoOwner is the address used to deploy the ChangeDao contract.  This is also used in Funding.sol as the address that can withdraw the changeDao percentage.  Should this be updated so that the withdrawal is done by changeDaoWallet, which will be a separate address from changeDaoOwner?

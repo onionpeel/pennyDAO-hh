@@ -80,7 +80,7 @@ contract Funding is Initializable {
     if ((_token == DAI || _token == USDC) && _amount >= _mintPrice) return true;
 
     (, int256 eth_to_usd, , , ) = Oracle(ETH_USD_ORACLE).latestRoundData();
-    uint256 amountInUsd = _amount * uint256(eth_to_usd) * 10**10;
+    uint256 amountInUsd = msg.value * uint256(eth_to_usd) * 10**10;
     if ((_token == ETH_ADDRESS) && amountInUsd >= _mintPrice) return true;
 
     return false;
@@ -97,15 +97,16 @@ contract Funding is Initializable {
 
     if (_token == ETH_ADDRESS) {
       ethBalances[changeMakerCloneOwner] += msg.value * changeMakerPercentage;
-      ethBalances[changeDao] += msg.value * changeDaoPercentage;
-      ethBalances[communityFund] += msg.value * communityFundPercentage;
+      ethBalances[changeDaoOwner] += msg.value * changeDaoPercentage;
+      ethBalances[communityFundAddress] += msg.value * communityFundPercentage;
     } else {
       uint256 changeMakerCloneOwnerAmount = _amount * changeMakerPercentage;
       uint256 changeDaoAmount = _amount * changeDaoPercentage;
       uint256 communityFundAmount = _amount * communityFundPercentage;
 
       address changeDaoOwner = IChangeDao(changeDaoContract).owner();
-      address communityFundAddress = IChangeDao(communityFundAddress).owner();
+      address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
+
       IERC20(_token).safeTransferFrom(_sponsor, changeMakerCloneOwner, changeMakerCloneOwnerAmount);
       IERC20(_token).safeTransferFrom(_sponsor, changeDaoOwner, changeDaoAmount);
       IERC20(_token).safeTransferFrom(_sponsor, communityFundAddress, communityFundAmount);
@@ -113,7 +114,13 @@ contract Funding is Initializable {
   }
 
   function withdrawEth() public {
-    require(msg.sender);
+    require(msg.sender == changeMakerCloneOwner || msg.sender == changeDaoOwner ||
+      msg.sender = communityFundAddress, "Not authorized to withdraw ETH");
+
+    ethBalances[msg.sender] = 0;
+
+    (bool success,) = msg.sender.call{value: ethBalances[msg.sender]}("");
+    require(success, "Failed to withdraw ETH");
   }
 
 

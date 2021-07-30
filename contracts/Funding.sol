@@ -43,10 +43,12 @@ contract Funding is Initializable {
   uint16 changeDaoPercentage; // funding withdrawal
   uint16 communityFundPercentage; // funding withdrawal
 
+  address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+  address constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
   address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-  address ETH_USD_ORACLE = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
+  address constant ETH_USD_ORACLE = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
 
-  EnumerableSet.AddressSet permittedTokens;
+  // EnumerableSet.AddressSet permittedTokens;
   mapping (address => uint256) public ethBalances;
 
   fallback() external payable {}
@@ -56,9 +58,9 @@ contract Funding is Initializable {
     changeMakerClone = _changeMakerClone; // Set the project clone as the owner
     changeMakerCloneOwner = _changeMakerCloneOwner; // the changeMaker that created the project
     /// @notice Create a set of tokens that are approved to be used for funding
-    for (uint256 idx = 0; idx < _permittedTokens.length; idx++) {
-      permittedTokens.push(_permittedTokens[idx]);
-    }
+    // for (uint256 idx = 0; idx < _permittedTokens.length; idx++) {
+    //   permittedTokens.push(_permittedTokens[idx]);
+    // }
 
     /// @notice Retrieve the changeDao contract address to be used for returning withdrawal percentages
     changeDaoContract = IChangeMaker(_changeMakerClone).changeDaoContract();
@@ -75,11 +77,11 @@ contract Funding is Initializable {
     view
     returns (bool)
   {
-    if (_token == permittedTokens.contains(_token) && _amount >= _mintPrice) return true;
+    if ((_token == DAI || _token == USDC) && _amount >= _mintPrice) return true;
 
     (, int256 eth_to_usd, , , ) = Oracle(ETH_USD_ORACLE).latestRoundData();
     uint256 amountInUsd = _amount * uint256(eth_to_usd) * 10**10;
-    if (_token == permittedTokens.contains(_token) && amountInUsd >= _mintPrice) return true;
+    if ((_token == ETH_ADDRESS) && amountInUsd >= _mintPrice) return true;
 
     return false;
   }

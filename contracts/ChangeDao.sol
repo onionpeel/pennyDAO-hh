@@ -3,6 +3,7 @@ pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./ChangeMaker.sol";
@@ -80,8 +81,20 @@ contract ChangeDao is Ownable, ERC721 {
     ChangeMaker(clone).initialize(msg.sender);
   }
 
-  /// *********** EVERYTHING BELOW IS UNFINISHED **************************
+  /// @notice Receives donations in ETH, DAI or USDC
+  function donate(address _token, uint256 _amount) public payable {
+    require(_token == DAI || _token == USDC || _token == ETH);
 
-  ///DONATION
+    if (_token == DAI || _token == USDC) {
+      IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
+    }
+  }
 
+  /* @notice Only changeDao owner can withdraw the ETH balance from the contract */
+  function withdrawEth(uint256 _amount) public {
+    require(msg.sender == owner(), "Not authorized to withdraw ETH");
+    require(_amount <= address(this).balance, "Amount exceeds balance");
+    (bool success,) = msg.sender.call{value: _amount}("");
+    require(success, "Failed to withdraw ETH");
+  }
 }

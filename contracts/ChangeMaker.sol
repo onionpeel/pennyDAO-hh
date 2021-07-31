@@ -4,6 +4,7 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Project.sol";
@@ -67,7 +68,20 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     );
   }
 
-  /// *********** EVERYTHING BELOW IS UNFINISHED **************************
+  /// @notice Receives donations in ETH, DAI or USDC
+  function donate(address _token, uint256 _amount) public payable {
+    require(_token == DAI || _token == USDC || _token == ETH);
 
-  // Donation
+    if (_token == DAI || _token == USDC) {
+      IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
+    }
+  }
+
+  /* @notice Only changeMaker clone owner can withdraw the ETH balance from the contract */
+  function withdrawEth() public {
+    require(msg.sender == changeMakerCloneOwner, "Not authorized to withdraw ETH");
+
+    (bool success,) = msg.sender.call{value: address(this).balance}("");
+    require(success, "Failed to withdraw ETH");
+  }
 }

@@ -53,15 +53,12 @@ contract Funding is Initializable {
 
   fallback() external payable {}
 
-
+  /// @notice Funding contract initialization
+  /// @param _changeMakerClone Address of the changeMaker clone that created this project
+  /// @param _changeMakerCloneOwner Owner of _changeMakerClone
   function initialize(address _changeMakerClone, address _changeMakerCloneOwner) public initializer {
     changeMakerClone = _changeMakerClone; // Set the project clone as the owner
     changeMakerCloneOwner = _changeMakerCloneOwner; // the changeMaker that created the project
-    /// @notice Create a set of tokens that are approved to be used for funding
-    // for (uint256 idx = 0; idx < _permittedTokens.length; idx++) {
-    //   permittedTokens.push(_permittedTokens[idx]);
-    // }
-
     /// @notice Retrieve the changeDao contract address to be used for returning withdrawal percentages
     changeDaoContract = IChangeMaker(_changeMakerClone).changeDaoContract();
     /// @notice Set the project's withdrawal percentages
@@ -72,47 +69,55 @@ contract Funding is Initializable {
 
 
   /// @notice Check whether the funding amount is greater or equal to mintPrice
+  /// @param _token Token for funding the project
+  /// @param _amount Amount in DAI, USDC or ETH
+  /// @param _mintPrice The minimum amount that a sponsor must send to fund the project
   function _isSufficientFunding(address _token, uint256 _amount, uint256 _mintPrice)
     private
     view
     returns (bool)
   {
+    /// @notice If token is DAI or USDC, check the amount
     if ((_token == DAI || _token == USDC) && _amount >= _mintPrice) return true;
-
+    /// @notice Check amount if ETH is sent
     (, int256 eth_to_usd, , , ) = Oracle(ETH_USD_ORACLE).latestRoundData();
     uint256 amountInUsd = msg.value * uint256(eth_to_usd) * 10**10;
     if ((_token == ETH_ADDRESS) && amountInUsd >= _mintPrice) return true;
-
+    /// @notice Return false if the token is not DAI, USDC or ETH
     return false;
   }
 
+  /* @notice Called by Project.sol directFund(). Divides the sponsor amount into the three distribution percentages*/
   function fund(address _token, uint256 _amount, uint256 _mintPrice, address _sponsor)
     external
     payable
     returns (bool)
   {
+    /// @notice Check that the function is called by its project clone
     require(msg.sender == changeMakerClone, "Only the project clone can call fund()");
     /// @notice Check that the funding amount is equal or greater than the required minimum
     require(_isSufficientFunding(_token, _amount, _mintPrice), "Insufficient funding amount");
-
+    /// @notice If ETH, calculate percentages and store them in ethBalances
     if (_token == ETH_ADDRESS) {
       ethBalances[changeMakerCloneOwner] += msg.value * changeMakerPercentage;
       ethBalances[changeDaoOwner] += msg.value * changeDaoPercentage;
       ethBalances[communityFundAddress] += msg.value * communityFundPercentage;
     } else {
+      /// @notice If DAI or USDC, calculate percentages
       uint256 changeMakerCloneOwnerAmount = _amount * changeMakerPercentage;
       uint256 changeDaoAmount = _amount * changeDaoPercentage;
       uint256 communityFundAmount = _amount * communityFundPercentage;
-
+      /// @notice Retrieve addresses
       address changeDaoOwner = IChangeDao(changeDaoContract).owner();
       address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
-
+      /// @notice Store amounts in ethBalances based on percentages
       IERC20(_token).safeTransferFrom(_sponsor, changeMakerCloneOwner, changeMakerCloneOwnerAmount);
       IERC20(_token).safeTransferFrom(_sponsor, changeDaoOwner, changeDaoAmount);
       IERC20(_token).safeTransferFrom(_sponsor, communityFundAddress, communityFundAmount);
     }
   }
 
+  /* @notice changeMakerCloneOwner, changeDaoOwner and communityFundAddress can withdraw their ETH balance from the contract */
   function withdrawEth() public {
     require(msg.sender == changeMakerCloneOwner || msg.sender == changeDaoOwner ||
       msg.sender = communityFundAddress, "Not authorized to withdraw ETH");
@@ -122,7 +127,4 @@ contract Funding is Initializable {
     (bool success,) = msg.sender.call{value: ethBalances[msg.sender]}("");
     require(success, "Failed to withdraw ETH");
   }
-
-
-
 }

@@ -2,8 +2,7 @@
 pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 
 interface Oracle {
@@ -43,8 +42,8 @@ contract Funding is Initializable {
   uint16 changeDaoPercentage; // funding withdrawal
   uint16 communityFundPercentage; // funding withdrawal
 
-  address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-  address constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+  address constant USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+  address constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
   address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
   address constant ETH_USD_ORACLE = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
 
@@ -60,7 +59,7 @@ contract Funding is Initializable {
     changeMakerClone = _changeMakerClone; // Set the project clone as the owner
     changeMakerCloneOwner = _changeMakerCloneOwner; // the changeMaker that created the project
     /// @notice Retrieve the changeDao contract address to be used for returning withdrawal percentages
-    changeDaoContract = IChangeMaker(_changeMakerClone).changeDaoContract();
+    changeDaoContract = IChangeMaker(_changeMakerClone).getChangeDaoAddress();
     /// @notice Set the project's withdrawal percentages
     changeMakerPercentage = IChangeDao(changeDaoContract).changeMakerPercentage();
     changeDaoPercentage = IChangeDao(changeDaoContract).changeDaoPercentage();
@@ -78,7 +77,7 @@ contract Funding is Initializable {
     returns (bool)
   {
     /// @notice If token is DAI or USDC, check the amount
-    if ((_token == DAI || _token == USDC) && _amount >= _mintPrice) return true;
+    if ((_token == DAI_ADDRESS || _token == USDC_ADDRESS) && _amount >= _mintPrice) return true;
     /// @notice Check amount if ETH is sent
     (, int256 eth_to_usd, , , ) = Oracle(ETH_USD_ORACLE).latestRoundData();
     uint256 amountInUsd = msg.value * uint256(eth_to_usd) * 10**10;
@@ -97,8 +96,14 @@ contract Funding is Initializable {
     require(msg.sender == changeMakerClone, "Only the project clone can call fund()");
     /// @notice Check that the funding amount is equal or greater than the required minimum
     require(_isSufficientFunding(_token, _amount, _mintPrice), "Insufficient funding amount");
+
+    /// @notice Retrieve addresses
+    address changeDaoOwner = IChangeDao(changeDaoContract).owner();
+    address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
+
     /// @notice If ETH, calculate percentages and store them in ethBalances
     if (_token == ETH_ADDRESS) {
+      /// @notice Set ethBalances based on the percentages
       ethBalances[changeMakerCloneOwner] += msg.value * changeMakerPercentage;
       ethBalances[changeDaoOwner] += msg.value * changeDaoPercentage;
       ethBalances[communityFundAddress] += msg.value * communityFundPercentage;
@@ -107,9 +112,7 @@ contract Funding is Initializable {
       uint256 changeMakerCloneOwnerAmount = _amount * changeMakerPercentage;
       uint256 changeDaoAmount = _amount * changeDaoPercentage;
       uint256 communityFundAmount = _amount * communityFundPercentage;
-      /// @notice Retrieve addresses
-      address changeDaoOwner = IChangeDao(changeDaoContract).owner();
-      address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
+
       /// @notice Store amounts in ethBalances based on percentages
       IERC20(_token).safeTransferFrom(_sponsor, changeMakerCloneOwner, changeMakerCloneOwnerAmount);
       IERC20(_token).safeTransferFrom(_sponsor, changeDaoOwner, changeDaoAmount);
@@ -119,6 +122,10 @@ contract Funding is Initializable {
 
   /* @notice changeMakerCloneOwner, changeDaoOwner and communityFundAddress can withdraw their ETH balance from the contract */
   function withdrawEth() public {
+    /// @notice Retrieve addresses
+    address changeDaoOwner = IChangeDao(changeDaoContract).owner();
+    address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
+
     require(msg.sender == changeMakerCloneOwner || msg.sender == changeDaoOwner ||
       msg.sender = communityFundAddress, "Not authorized to withdraw ETH");
 

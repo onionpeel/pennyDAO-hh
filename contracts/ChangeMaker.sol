@@ -5,11 +5,13 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Project.sol";
 
 contract ChangeMaker is ERC721, Ownable, Initializable {
+  using SafeERC20 for IERC20;
   using Counters for Counters.Counter;
   Counters.Counter public projectTokenId;
 
@@ -17,12 +19,18 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   address public changeDaoContract;
   address immutable projectImplementation;
 
+  address constant USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+  address constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+  address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
   /// @notice Maps NFT project token id to project clone
   mapping (uint256 => address) public projectClones;
 
-  constructor(address _changeDaoContract) ERC721('ChangeMaker', 'CHNMKR') {
+  constructor(address _changeDaoContract, address _changeDaoContractOwner)
+    ERC721('ChangeMaker', 'CHNMKR')
+  {
     changeDaoContract = _changeDaoContract;
-    projectImplementation = address(new Project());
+    projectImplementation = address(new Project(_changeDaoContractOwner));
   }
 
   /// @notice This replaces a constructor in clones
@@ -42,9 +50,9 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   function createProject(
     uint256 _mintPrice,
     uint256 _mintTotal,
-    string _tokenName,
-    string _tokenSymbol,
-    string _tokenCid
+    string memory _tokenName,
+    string memory _tokenSymbol,
+    string memory _tokenCid
   )
     public
   {
@@ -58,7 +66,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     _safeMint(msg.sender, currentToken);
     projectClones[currentToken] = projectClone;
 
-    Project(clone).initialize(
+    Project(projectClone).initialize(
       _mintPrice,
       _mintTotal,
       _tokenName,
@@ -68,11 +76,15 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     );
   }
 
+  function getChangeDaoAddress() public returns (address) {
+    return owner();
+  }
+
   /// @notice Receives donations in ETH, DAI or USDC
   function donate(address _token, uint256 _amount) public payable {
-    require(_token == DAI || _token == USDC || _token == ETH);
+    require(_token == DAI_ADDRESS || _token == USDC_ADDRESS || _token == ETH_ADDRESS);
 
-    if (_token == DAI || _token == USDC) {
+    if (_token == DAI_ADDRESS || _token == USDC_ADDRESS) {
       IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
     }
   }

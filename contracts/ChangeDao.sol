@@ -4,11 +4,13 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./ChangeMaker.sol";
 
 contract ChangeDao is Ownable, ERC721 {
+  using SafeERC20 for IERC20;
   using Counters for Counters.Counter;
   Counters.Counter public changeMakerTokenId;
   address immutable public changeMakerImplementation;
@@ -16,6 +18,10 @@ contract ChangeDao is Ownable, ERC721 {
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
   address payable public communityFundAddress;
+
+  address constant USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+  address constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+  address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
@@ -25,7 +31,7 @@ contract ChangeDao is Ownable, ERC721 {
   /// @notice ChangeDao is deployed as an ERC721 contract
   constructor(address payable _communityFundAddress) ERC721('ChangeDAO', 'CHNDv1IMPL') {
     communityFundAddress = _communityFundAddress;
-    changeMakerImplementation = address(new ChangeMaker(address(this)));
+    changeMakerImplementation = address(new ChangeMaker(address(this), msg.sender));
   }
 
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
@@ -78,14 +84,14 @@ contract ChangeDao is Ownable, ERC721 {
     _safeMint(msg.sender, currentToken);
     changeMakerClones[currentToken] = clone;
 
-    ChangeMaker(clone).initialize(msg.sender);
+    ChangeMaker(clone).initialize(msg.sender, address(this));
   }
 
   /// @notice Receives donations in ETH, DAI or USDC
   function donate(address _token, uint256 _amount) public payable {
-    require(_token == DAI || _token == USDC || _token == ETH);
+    require(_token == DAI_ADDRESS || _token == USDC_ADDRESS || _token == ETH_ADDRESS);
 
-    if (_token == DAI || _token == USDC) {
+    if (_token == DAI_ADDRESS || _token == USDC_ADDRESS) {
       IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
     }
   }

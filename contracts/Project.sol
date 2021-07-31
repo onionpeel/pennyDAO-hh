@@ -2,28 +2,31 @@
 pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./Funding.sol";
 
+interface IFunding {
+  function fund(address, uint256, uint256, address) external payable returns (bool);
+}
 
-contract Project is ERC721URIStorage, Initializable {
+
+contract Project is ERC721, Initializable {
   using Counters for Counters.Counter;
+  Counters.Counter sponsorId; // NFT minting
 
   uint256 mintPrice; // changeMaker sets price; expressed in DAI
   uint256 mintTotal; // changeMaker sets total mints
   address public changeMakerCloneOwner; // access control; changeMaker clone that created the project
-  address fundingClone; // Address of clone
+  address payable fundingClone; // Address of clone
+  address changeDaoContractOwner; // Address of ChangeDao contract owner
   string tokenCid; // NFT minting
-  Counters sponsorId; // NFT minting
 
-
-  ///WILL SOMETHING LIKE THIS BE NEEDED?
-  // constructor() {
-  //     // prevent the implementation contract from being initialized
-  //     goalAmount = uint256(-1);
-  // }
+  constructor(address _changeDaoContractOwner) ERC721URIStorage("Some Name", "SYMB") {
+    changeDaoContractOwner = _changeDaoContractOwner;
+  }
 
   /// @notice This replaces a constructor in clones
   /// @dev This function should be called immediately after the project clone is created
@@ -36,17 +39,14 @@ contract Project is ERC721URIStorage, Initializable {
   function initialize(
     uint256 _mintPrice,
     uint256 _mintTotal,
-    string _tokenName,
-    string _tokenSymbol,
-    string _tokenCid,
+    string memory _tokenName,
+    string memory _tokenSymbol,
+    string memory _tokenCid,
     address _changeMakerCloneOwner //the changeMaker clone that is creating this project
   )
     public
     initializer
   {
-    /// SHOULD NAME/SYMBOL BE CUSTOMIZABLE????
-    ERC721(_tokenName, _tokenSymbol);
-
     require(_mintPrice > 0, "Mint price must be larger than zero");
     require(_mintTotal > 0, "Mint total must be larger than zero");
     mintPrice = _mintPrice;
@@ -56,29 +56,17 @@ contract Project is ERC721URIStorage, Initializable {
     changeMakerCloneOwner = _changeMakerCloneOwner;
 
     address fundingImplementation = address(new Funding());
-    fundingClone = Clones.clone(fundingImplementation);
-    Funding(fundingClone).initialize(msg.sender, _changeMakerCloneOwner, _permittedTokens);
+    fundingClone = payable(Clones.clone(fundingImplementation));
+    Funding(fundingClone).initialize(msg.sender, _changeMakerCloneOwner);
   }
 
-
-  // Direct funding model
-  /* Flow within directFund()
-  1. receive amount:
-  a) erc20 stablecoin
-  b) eth
-  *2. Check that the mintTotal set by the changemaker is greater than the number of NFTs that have been minted.
-  3. Check that the amount is greater than the mintPrice set by the changemaker. This will require conversions to DAI? from other stablecoins and eth
-  3. Divide the amount based on percentages for changemaker, changedao, and community fund
-  4. Distribute the divided amounts to those three parties
-  5. Mint NFT for the address that sent the funds
-  */
 
   /// @notice Sponsors send funds to the project and receive an NFT
   function directFund(address _token, uint256 _amount) public {
     /// @notice Check that project NFTs remain to be minted
-    require(mintTotal > sponsorId, "Unable to fund. All tokens have already been minted");
+    require(mintTotal > sponsorId.current(), "Unable to fund. All tokens have already been minted");
     /// @notice Checks that funding was successful
-    require(projectClone.fund(_token, _amount, mintPrice, msg.sender));
+    require(IFunding(fundingClone).fund(_token, _amount, mintPrice, msg.sender));
     /// @notice Update sponsorId
     sponsorId.increment();
     uint currentToken = sponsorId.current();
@@ -89,7 +77,7 @@ contract Project is ERC721URIStorage, Initializable {
 
   /* @notice The changeMaker and ChangeDao are authorized to terminate the project so it will no longer receive funding */
   function terminateProject() public {
-    require(msg.sender == changeDao || msg.sender == changeMakerCloneOwner,
+    require(msg.sender == changeDaoContractOwner || msg.sender == changeMakerCloneOwner,
       "Not authorized to terminate project");
     /// @notice Setting the value to zero causes fund() to revert
     mintTotal = 0;

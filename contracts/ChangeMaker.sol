@@ -26,17 +26,15 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   /// @notice Maps NFT project token id to project clone
   mapping (uint256 => address) public projectClones;
 
-  constructor(address _changeDaoContract, address _changeDaoContractOwner)
-    ERC721('ChangeMaker', 'CHNMKR')
-  {
+  constructor(address _changeDaoContract) ERC721('ChangeMaker', 'CHMKRv1') {
     changeDaoContract = _changeDaoContract;
-    projectImplementation = address(new Project(_changeDaoContractOwner));
+    projectImplementation = address(new Project());
   }
 
   /// @notice This replaces a constructor in clones
   /// @dev This function is called immediately after the changeMaker clone is created
   /// @param _changeMakerCloneOwner The address of the changeMaker that created the clone
-  function initialize(address _changeMakerCloneOwner, address _changeDaoAddress) public initializer {
+  function initialize(address _changeMakerCloneOwner) public initializer {
     changeMakerCloneOwner = _changeMakerCloneOwner;
   }
 
@@ -44,15 +42,12 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   /// @dev Only the changeMaker that is the clone owner can call this function
   /// @param _mintPrice Minimum amount to fund a project and mint a token
   /// @param _mintTotal Total number of tokens that the project will mint
-  /// @param _tokenName ChangeMaker sets the token name
-  /// @param _tokenSymbol ChangeMaker sets the token symbol
   /// @param _tokenCid The cid that is used for setting the token URI
   function createProject(
     uint256 _mintPrice,
     uint256 _mintTotal,
-    string memory _tokenName,
-    string memory _tokenSymbol,
-    string memory _tokenCid
+    string memory _tokenCid,
+    address[] memory _permittedTokens
   )
     public
   {
@@ -69,10 +64,9 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     Project(projectClone).initialize(
       _mintPrice,
       _mintTotal,
-      _tokenName,
-      _tokenSymbol,
       _tokenCid,
-      address(this) // Address of the changeMaker clone that is creating this project
+      address(this), // Address of the changeMaker clone that is creating this project
+      _permittedTokens
     );
   }
 

@@ -31,7 +31,7 @@ contract ChangeDao is Ownable, ERC721 {
   /// @notice ChangeDao is deployed as an ERC721 contract
   constructor(address payable _communityFundAddress) ERC721('ChangeDAO', 'CHNDv1IMPL') {
     communityFundAddress = _communityFundAddress;
-    changeMakerImplementation = address(new ChangeMaker(address(this), msg.sender));
+    changeMakerImplementation = address(new ChangeMaker(address(this)));
   }
 
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
@@ -72,19 +72,19 @@ contract ChangeDao is Ownable, ERC721 {
 
   /// @notice Approved changeMakers can register
   /* @dev A clone from the changeMakerImplementation is created. An NFT is minted for the changeMaker's address.  The clone is mapped to the changeMaker's NFT token id.  Then the clone is initialized.*/
-  function register() public {
+  function registerChangeMaker() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
 
-    address clone = Clones.clone(changeMakerImplementation);
+    address changeMakerClone = Clones.clone(changeMakerImplementation);
 
     changeMakerTokenId.increment();
     uint256 currentToken = changeMakerTokenId.current();
 
     _safeMint(msg.sender, currentToken);
-    changeMakerClones[currentToken] = clone;
+    changeMakerClones[currentToken] = changeMakerClone;
 
-    ChangeMaker(clone).initialize(msg.sender, address(this));
+    ChangeMaker(changeMakerClone).initialize(msg.sender);
   }
 
   /// @notice Receives donations in ETH, DAI or USDC

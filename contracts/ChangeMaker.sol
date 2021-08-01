@@ -46,7 +46,8 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   /// @dev Only the changeMaker that is the clone owner can call this function
   /// @param _mintPrice Minimum amount to fund a project and mint a token
   /// @param _mintTotal Total number of tokens that the project will mint
-  /// @param _tokenCid The cid that is used for setting the token URI
+  /// @param _tokenCid The cid that is used for setting the token URI in the funding clone
+  /// @param _permittedTokens Tokens that are approved for funding
   function createProject(
     uint256 _mintPrice,
     uint256 _mintTotal,
@@ -64,12 +65,12 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     /// @notice Mint changeMaker's new project NFT that maps to the project clone
     _safeMint(msg.sender, currentToken);
     projectClones[currentToken] = projectClone;
-
+    /// @notice Initialize projectClone
     Project(projectClone).initialize(
       _mintPrice,
       _mintTotal,
       _tokenCid,
-      address(this), // Address of the changeMaker clone that is creating this project
+      address(this), // Address of the changeMaker clone that is creating this project clone
       _permittedTokens
     );
   }

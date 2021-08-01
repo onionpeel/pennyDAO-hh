@@ -91,7 +91,7 @@ contract ChangeDao is Ownable, ERC721 {
     /* @notice An NFT is minted for the changeMaker's address and is mapped to the changeMaker's NFT token id */
     _safeMint(msg.sender, currentToken);
     changeMakerClones[currentToken] = changeMakerClone;
-    /// @notice The changeMakerClone is initialized
+    /// @notice Initialize changeMakerClone
     ChangeMaker(changeMakerClone).initialize(msg.sender);
   }
 

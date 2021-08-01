@@ -188,6 +188,10 @@ contract Funding is ERC721URIStorage, Initializable {
     _mintTokens(_sponsor);
   }
 
+
+  // ????????????????????????????????
+  /* ###################withdrawEth() could be rewritten using an enumerable set of addresses that can withdraw ETH from the contract */
+
   /// @notice Checks that an address has ETH in the contract that can be withdrawn using withdrawEth()
   function _mayWithdrawEth(address _msgSender) private returns (bool) {
     if (ethBalances[_msgSender] > 0) {

@@ -21,11 +21,12 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
 
   address constant USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
   address constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-  address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   /// @notice Maps NFT project token id to project clone
   mapping (uint256 => address) public projectClones;
 
+  /// @notice Sets changeDaoContract address and creates Project implementation contract
+  /// @param _changeDaoContract Address of the changeDao contract that called this constructor
   constructor(address _changeDaoContract) ERC721('ChangeMaker', 'CHMKRv1') {
     changeDaoContract = _changeDaoContract;
     projectImplementation = address(new Project());
@@ -70,17 +71,31 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     );
   }
 
+  /// @notice Retrieve the address of the changeDao contract
   function getChangeDaoAddress() public returns (address) {
     return owner();
   }
 
-  /// @notice Receives donations in ETH, DAI or USDC
-  function donate(address _token, uint256 _amount) public payable {
-    require(_token == DAI_ADDRESS || _token == USDC_ADDRESS || _token == ETH_ADDRESS);
+  //????????????????????????
+  /* Donation can be changed to accomodate a list of permitted tokens.  Is this needed in v1 since it only accepts ETH, DAI and USDC?  Constants would be cheaper than creating an enumerable set of permitted tokens */
 
-    if (_token == DAI_ADDRESS || _token == USDC_ADDRESS) {
-      IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
-    }
+  /// @notice Check that the token is either DAI or USDC
+  /// @param _token Token for funding
+  function _isTokenAccepted(address _token) private returns (bool) {
+    if (_token == DAI_ADDRESS) {
+      return true;
+    } else if (_token == USDC_ADDRESS) {
+      return true;
+    } else return false;
+  }
+
+  /// @notice Receives donations in ETH, DAI or USDC
+  /// @param _token Token for funding
+  /// @param _amount Funding amount
+  function donate(address _token, uint256 _amount) public payable {
+    require(_isTokenAccepted(_token), "Donations must be in ETH, DAI or USDC");
+
+    IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
   }
 
   /* @notice Only changeMaker clone owner can withdraw the ETH balance from the contract */

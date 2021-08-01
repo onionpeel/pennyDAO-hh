@@ -22,7 +22,6 @@ contract ChangeDao is Ownable, ERC721 {
 
   address constant USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
   address constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-  address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   /// @notice Maintains a list of addresses that are permitted to register as changemakers
   mapping (address => bool) public approvedChangeMakers;
@@ -92,20 +91,36 @@ contract ChangeDao is Ownable, ERC721 {
     ChangeMaker(changeMakerClone).initialize(msg.sender);
   }
 
-  /// @notice Receives donations in ETH, DAI or USDC
-  function donate(address _token, uint256 _amount) public payable {
-    require(_token == DAI_ADDRESS || _token == USDC_ADDRESS || _token == ETH_ADDRESS);
 
-    if (_token == DAI_ADDRESS || _token == USDC_ADDRESS) {
-      IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
-    }
+
+
+  //????????????????????????
+  /* Donation can be changed to accomodate a list of permitted tokens.  Is this needed in v1 since it only accepts ETH, DAI and USDC?  Constants would be cheaper than creating an enumerable set of permitted tokens */
+
+  /// @notice Check that the token is either DAI or USDC
+  /// @param _token Token for funding
+  function _isTokenAccepted(address _token) private returns (bool) {
+    if (_token == DAI_ADDRESS) {
+      return true;
+    } else if (_token == USDC_ADDRESS) {
+      return true;
+    } else return false;
   }
 
-  /* @notice Only changeDao owner can withdraw the ETH balance from the contract */
-  function withdrawEth(uint256 _amount) public {
-    require(msg.sender == owner(), "Not authorized to withdraw ETH");
-    require(_amount <= address(this).balance, "Amount exceeds balance");
-    (bool success,) = msg.sender.call{value: _amount}("");
+  /// @notice Receives donations in ETH, DAI or USDC
+  /// @param _token Token for funding
+  /// @param _amount Funding amount
+  function donate(address _token, uint256 _amount) public payable {
+    require(_isTokenAccepted(_token), "Donations must be in ETH, DAI or USDC");
+
+    IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
+  }
+
+  /* @notice Only changeMaker clone owner can withdraw the ETH balance from the contract */
+  function withdrawEth() public {
+    require(msg.sender == changeDaoWallet, "Not authorized to withdraw ETH");
+
+    (bool success,) = msg.sender.call{value: address(this).balance}("");
     require(success, "Failed to withdraw ETH");
   }
 

@@ -1,9 +1,3 @@
-1.  Some variables are public for testing.  Should they be changed to private and have the tests re-written?
+1. Fallback/receive functions for all contracts. Does there need to be a function to withdraw eth that ends up in a contract through the fallback/receive funtions?
 
-2. Will ChangeMaker and Project need an admin?
-
-3. ChangeMaker does not need to be ownable because there are no functions on the implementation that need access control.  All of the access control happens for the clones, which is set in the initializer.
-
-4. Fallback/receive functions for all contracts. Does there need to be a function to withdraw eth that ends up in a contract through the fallback/receive funtions?
-
-5. changeDaoOwner is the address used to deploy the ChangeDao contract.  This is also used in Funding.sol as the address that can withdraw the changeDao percentage.  Should this be updated so that the withdrawal is done by changeDaoWallet, which will be a separate address from changeDaoOwner?
+2. Should the types of funding tokens be held in an enumerable set or should this just be hardcoded using constant variables since there are only two for the MVP, DAI and USDC?  Normally, this would be bad coding style, but what is the better solution here?

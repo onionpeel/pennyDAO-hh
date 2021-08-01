@@ -28,6 +28,7 @@ interface IChangeDao {
   function getCommunityFundPercentage() external view returns (uint16);
   function owner() external view returns (address); //returns address that deployed ChangeDAO.sol
   function communityFundWallet() external view returns (address);
+  function changeDaoWallet() external view returns (address);
 }
 
 interface IChangeMaker {
@@ -61,7 +62,7 @@ contract Funding is ERC721URIStorage, Initializable {
   // EnumerableSet.AddressSet permittedTokens;
   mapping (address => uint256) public ethBalances;
 
-  fallback() external payable {}
+  receive() external payable {}
 
   constructor() ERC721("Funding", "FNDv1") {}
 
@@ -178,7 +179,6 @@ contract Funding is ERC721URIStorage, Initializable {
   function directFund(address _token, uint256 _amount, uint256 _mintPrice, address _sponsor)
     external
     payable
-    returns (bool)
   {
     /// @notice Check that the funding amount is equal or greater than the required minimum
     require(_isSufficientFunding(_token, _amount, _mintPrice), "Insufficient funding amount");
@@ -193,7 +193,7 @@ contract Funding is ERC721URIStorage, Initializable {
   /* ###################withdrawEth() could be rewritten using an enumerable set of addresses that can withdraw ETH from the contract */
 
   /// @notice Checks that an address has ETH in the contract that can be withdrawn using withdrawEth()
-  function _mayWithdrawEth(address _msgSender) private returns (bool) {
+  function _mayWithdrawEth(address _msgSender) private view returns (bool) {
     if (ethBalances[_msgSender] > 0) {
       return true;
     } else return false;
@@ -201,10 +201,6 @@ contract Funding is ERC721URIStorage, Initializable {
 
   /* @notice changeMakerCloneOwner, changeDaoWallet and communityFundWallet can withdraw their ETH balance from the project clone */
   function withdrawEth() public {
-    /// @notice Retrieve addresses
-    address changeDaoWallet = IChangeDao(changeDaoContract).changeDaoWallet();
-    address communityFundWallet = IChangeDao(changeDaoContract).communityFundWallet();
-
     require(_mayWithdrawEth(msg.sender), "Not authorized to withdraw ETH");
 
     ethBalances[msg.sender] = 0;
@@ -215,7 +211,7 @@ contract Funding is ERC721URIStorage, Initializable {
 
 
   /// @notice Check that msg.sender is authorized contract owner
-  function _isAuthorizedOwner(address _msgSender) private returns (bool) {
+  function _isAuthorizedOwner(address _msgSender) private view returns (bool) {
     address changeDaoContractOwner = IChangeDao(changeDaoContract).owner();
 
     if (_msgSender == changeDaoContractOwner) {

@@ -32,6 +32,8 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     projectImplementation = address(new Project());
   }
 
+  receive() external payable {}
+
   /// @notice This replaces a constructor in clones
   /// @dev This function is called immediately after the changeMaker clone is created
   /// @param _changeMakerCloneOwner The address of the changeMaker that created the clone
@@ -72,7 +74,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   }
 
   /// @notice Retrieve the address of the changeDao contract
-  function getChangeDaoAddress() public returns (address) {
+  function getChangeDaoAddress() public view returns (address) {
     return owner();
   }
 
@@ -81,7 +83,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
 
   /// @notice Check that the token is either DAI or USDC
   /// @param _token Token for funding
-  function _isTokenAccepted(address _token) private returns (bool) {
+  function _isTokenAccepted(address _token) private pure returns (bool) {
     if (_token == DAI_ADDRESS) {
       return true;
     } else if (_token == USDC_ADDRESS) {

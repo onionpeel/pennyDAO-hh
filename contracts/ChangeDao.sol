@@ -38,6 +38,8 @@ contract ChangeDao is Ownable, ERC721 {
     changeMakerImplementation = address(new ChangeMaker(address(this)));
   }
 
+  receive() external payable {}
+
   /// @notice The ChangeDao contract owner grants approval to become a changemaker
   /// @dev Only the contract owner (changeDao) can call this function
   /// @param _newChangeMaker The address that will be added to the mapping of approved changemakers
@@ -80,7 +82,7 @@ contract ChangeDao is Ownable, ERC721 {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
 
-    address changeMakerClone = Clones.clone(changeMakerImplementation);
+    address payable changeMakerClone = payable(Clones.clone(changeMakerImplementation));
 
     changeMakerTokenId.increment();
     uint256 currentToken = changeMakerTokenId.current();
@@ -99,7 +101,7 @@ contract ChangeDao is Ownable, ERC721 {
 
   /// @notice Check that the token is either DAI or USDC
   /// @param _token Token for funding
-  function _isTokenAccepted(address _token) private returns (bool) {
+  function _isTokenAccepted(address _token) private pure returns (bool) {
     if (_token == DAI_ADDRESS) {
       return true;
     } else if (_token == USDC_ADDRESS) {

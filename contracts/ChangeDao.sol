@@ -17,7 +17,7 @@ contract ChangeDao is Ownable, ERC721 {
   ///Percentages are stored as basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
-  address payable public communityFundAddress;
+  address payable public communityFundWallet;
 
   address constant USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
   address constant DAI_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -29,8 +29,9 @@ contract ChangeDao is Ownable, ERC721 {
   mapping (uint256 => address) public changeMakerClones;
 
   /// @notice ChangeDao is deployed as an ERC721 contract
-  constructor(address payable _communityFundAddress) ERC721('ChangeDAO', 'CHNDv1IMPL') {
-    communityFundAddress = _communityFundAddress;
+  /// @param _communityFundWallet Address that controls funds for the community fund 
+  constructor(address payable _communityFundWallet) ERC721('ChangeDAO', 'CHNDv1IMPL') {
+    communityFundWallet = _communityFundWallet;
     changeMakerImplementation = address(new ChangeMaker(address(this)));
   }
 

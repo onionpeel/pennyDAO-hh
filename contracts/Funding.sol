@@ -27,7 +27,7 @@ interface IChangeDao {
   function changeMakerPercentage() external view returns (uint16);
   function getCommunityFundPercentage() external view returns (uint16);
   function owner() external view returns (address); //returns address that deployed ChangeDAO.sol
-  function communityFundAddress() external view returns (address);
+  function communityFundWallet() external view returns (address);
 }
 
 interface IChangeMaker {
@@ -143,7 +143,7 @@ contract Funding is ERC721URIStorage, Initializable {
       /// @notice Set ethBalances based on the percentages
       ethBalances[changeMakerCloneOwner] += _ethAmount * changeMakerPercentage;
       ethBalances[changeDaoContractOwner] += _ethAmount * changeDaoPercentage;
-      ethBalances[communityFundAddress] += _ethAmount * communityFundPercentage;
+      ethBalances[communityFundWallet] += _ethAmount * communityFundPercentage;
     } else {
       /// @notice If DAI or USDC, calculate percentages
       uint256 changeMakerCloneOwnerAmount = _amount * changeMakerPercentage;
@@ -153,7 +153,7 @@ contract Funding is ERC721URIStorage, Initializable {
       /// @notice Store amounts in ethBalances based on percentages
       IERC20(_token).safeTransferFrom(_sponsor, changeMakerCloneOwner, changeMakerCloneOwnerAmount);
       IERC20(_token).safeTransferFrom(_sponsor, changeDaoContractOwner, changeDaoAmount);
-      IERC20(_token).safeTransferFrom(_sponsor, communityFundAddress, communityFundAmount);
+      IERC20(_token).safeTransferFrom(_sponsor, communityFundWallet, communityFundAmount);
     }
   }
 
@@ -188,12 +188,12 @@ contract Funding is ERC721URIStorage, Initializable {
     _mintTokens(_sponsor);
   }
 
-  /* @notice changeMakerCloneOwner, changeDaoOwner and communityFundAddress can withdraw their ETH balance from the contract */
+  /* @notice changeMakerCloneOwner, changeDaoOwner and communityFundWallet can withdraw their ETH balance from the contract */
   function withdrawEth() public {
     /// @notice Retrieve addresses
     ///////////////// FIX THIS *****************************
     // address changeDaoContractOwner = IChangeDao(changeDaoContract).owner();
-    // address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
+    // address communityFundWallet = IChangeDao(changeDaoContract).communityFundWallet();
     //
     // require(permittedTokens.contains(msg.sender), "Not authorized to withdraw ETH");
     //

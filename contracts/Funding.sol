@@ -135,14 +135,14 @@ contract Funding is ERC721URIStorage, Initializable {
     private
   {
     /// @notice Retrieve addresses
-    address changeDaoContractOwner = IChangeDao(changeDaoContract).owner();
-    address communityFundAddress = IChangeDao(changeDaoContract).communityFundAddress();
+    address changeDaoWallet = IChangeDao(changeDaoContract).changeDaoWallet();
+    address communityFundWallet = IChangeDao(changeDaoContract).communityFundWallet();
 
     /// @notice If ETH, calculate percentages and store them in ethBalances
     if (_token == ETH_ADDRESS) {
       /// @notice Set ethBalances based on the percentages
       ethBalances[changeMakerCloneOwner] += _ethAmount * changeMakerPercentage;
-      ethBalances[changeDaoContractOwner] += _ethAmount * changeDaoPercentage;
+      ethBalances[changeDaoWallet] += _ethAmount * changeDaoPercentage;
       ethBalances[communityFundWallet] += _ethAmount * communityFundPercentage;
     } else {
       /// @notice If DAI or USDC, calculate percentages
@@ -152,7 +152,7 @@ contract Funding is ERC721URIStorage, Initializable {
 
       /// @notice Store amounts in ethBalances based on percentages
       IERC20(_token).safeTransferFrom(_sponsor, changeMakerCloneOwner, changeMakerCloneOwnerAmount);
-      IERC20(_token).safeTransferFrom(_sponsor, changeDaoContractOwner, changeDaoAmount);
+      IERC20(_token).safeTransferFrom(_sponsor, changeDaoWallet, changeDaoAmount);
       IERC20(_token).safeTransferFrom(_sponsor, communityFundWallet, communityFundAmount);
     }
   }
@@ -188,11 +188,11 @@ contract Funding is ERC721URIStorage, Initializable {
     _mintTokens(_sponsor);
   }
 
-  /* @notice changeMakerCloneOwner, changeDaoOwner and communityFundWallet can withdraw their ETH balance from the contract */
+  /* @notice changeMakerCloneOwner, changeDaoWallet and communityFundWallet can withdraw their ETH balance from the contract */
   function withdrawEth() public {
     /// @notice Retrieve addresses
     ///////////////// FIX THIS *****************************
-    // address changeDaoContractOwner = IChangeDao(changeDaoContract).owner();
+    // address changeDaoWallet = IChangeDao(changeDaoContract).changeDaoWallet();
     // address communityFundWallet = IChangeDao(changeDaoContract).communityFundWallet();
     //
     // require(permittedTokens.contains(msg.sender), "Not authorized to withdraw ETH");
@@ -215,7 +215,7 @@ contract Funding is ERC721URIStorage, Initializable {
     } else return false;
   }
 
-  /* @notice The changeMaker and ChangeDao are authorized to terminate the project so it will no longer receive funding */
+  /* @notice The changeMaker and changeDaoContractOwner are authorized to terminate the project so it will no longer receive funding or mint*/
   function terminateProject() public {
     require(_isAuthorizedOwner(msg.sender), "Not authorized to terminate project");
     /// @notice Setting the value to zero causes fund() to revert

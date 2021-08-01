@@ -188,19 +188,25 @@ contract Funding is ERC721URIStorage, Initializable {
     _mintTokens(_sponsor);
   }
 
-  /* @notice changeMakerCloneOwner, changeDaoWallet and communityFundWallet can withdraw their ETH balance from the contract */
+  /// @notice Checks that an address has ETH in the contract that can be withdrawn using withdrawEth()
+  function _mayWithdrawEth(address _msgSender) private returns (bool) {
+    if (ethBalances[_msgSender] > 0) {
+      return true;
+    } else return false;
+  }
+
+  /* @notice changeMakerCloneOwner, changeDaoWallet and communityFundWallet can withdraw their ETH balance from the project clone */
   function withdrawEth() public {
     /// @notice Retrieve addresses
-    ///////////////// FIX THIS *****************************
-    // address changeDaoWallet = IChangeDao(changeDaoContract).changeDaoWallet();
-    // address communityFundWallet = IChangeDao(changeDaoContract).communityFundWallet();
-    //
-    // require(permittedTokens.contains(msg.sender), "Not authorized to withdraw ETH");
-    //
-    // ethBalances[msg.sender] = 0;
-    //
-    // (bool success,) = msg.sender.call{value: ethBalances[msg.sender]}("");
-    // require(success, "Failed to withdraw ETH");
+    address changeDaoWallet = IChangeDao(changeDaoContract).changeDaoWallet();
+    address communityFundWallet = IChangeDao(changeDaoContract).communityFundWallet();
+
+    require(_mayWithdrawEth(msg.sender), "Not authorized to withdraw ETH");
+
+    ethBalances[msg.sender] = 0;
+
+    (bool success,) = msg.sender.call{value: ethBalances[msg.sender]}("");
+    require(success, "Failed to withdraw ETH");
   }
 
 

@@ -108,4 +108,10 @@ contract ChangeDao is Ownable, ERC721 {
     (bool success,) = msg.sender.call{value: _amount}("");
     require(success, "Failed to withdraw ETH");
   }
+
+  /// @notice Change the wallet address for the communityFund or changeDao
+  ///*****************CREATE THIS FUNCTION
+  // function changeWallet() public {
+  //
+  // }
 }

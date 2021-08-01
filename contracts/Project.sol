@@ -17,6 +17,7 @@ contract Project is ERC721, Initializable {
   /// @notice Maps NFT fundingClone token id to funding clone
   mapping (uint256 => address) public fundingClones;
 
+  /// @notice Creates implementation for the funding clone 
   constructor() ERC721("Project", "PRJTv1") {
     fundingCloneImplementation = address(new Funding());
   }

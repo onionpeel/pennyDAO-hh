@@ -39,6 +39,7 @@ interface IChangeMaker {
 contract Funding is ERC721URIStorage, Initializable {
   using SafeERC20 for IERC20;
 
+  /*?????????????????????????? Should this be handled using constants since there will only ever be two permitted tokens in v1?  This also applies to donate() in ChangeDao and ChangeMaker */
   using EnumerableSet for EnumerableSet.AddressSet;
   EnumerableSet.AddressSet permittedTokens;
 
@@ -52,8 +53,8 @@ contract Funding is ERC721URIStorage, Initializable {
   uint16 changeDaoPercentage;
   uint16 communityFundPercentage;
 
-  uint256 mintPrice; // changeMaker sets price; expressed in DAI
-  uint256 mintTotal; // changeMaker sets total mints
+  uint256 public mintPrice; // changeMaker sets price; expressed in DAI
+  uint256 public mintTotal; // changeMaker sets total mints
   string tokenCid; // NFT minting
 
   address constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -62,13 +63,18 @@ contract Funding is ERC721URIStorage, Initializable {
   // EnumerableSet.AddressSet permittedTokens;
   mapping (address => uint256) public ethBalances;
 
+  /* ?????????????????????? This needs to be set up so that someone can withdraw the ETH if it is sent to the contract. */
   receive() external payable {}
 
   constructor() ERC721("Funding", "FNDv1") {}
 
   /// @notice Funding contract initialization
+  /// @param _mintPrice Minimum amount to fund a project and mint a token
+  /// @param _mintTotal Total number of tokens that the project will mint
+  /// @param _tokenCid The cid that is used for setting the token URI
   /// @param _changeMakerClone Address of the changeMaker clone that created this project
   /// @param _changeMakerCloneOwner Owner of _changeMakerClone
+  /// @param _permittedTokens Array of the tokens that can be used to fund the project
   function initialize(
     uint256 _mintPrice,
     uint256 _mintTotal,
@@ -95,7 +101,6 @@ contract Funding is ERC721URIStorage, Initializable {
     changeDaoPercentage = IChangeDao(changeDaoContract).changeDaoPercentage();
     communityFundPercentage = IChangeDao(changeDaoContract).getCommunityFundPercentage();
   }
-
 
   /// @notice Check whether the funding amount is greater or equal to mintPrice
   /// @param _fundingToken Token for funding the project
@@ -166,12 +171,12 @@ contract Funding is ERC721URIStorage, Initializable {
     /// @notice Update sponsorId
     sponsorId.increment();
     uint256 currentToken = sponsorId.current();
-    /// @notice Mint project NFT to msg.sender
+    /// @notice Mint project NFT to sponsor
     _safeMint(_sponsor, currentToken);
     _setTokenURI(currentToken, tokenCid);
   }
 
-  /* @notice Called by Project.sol directFund(). Divides the sponsor amount into the three distribution percentages*/
+  /// @notice Fund the project
   /// @param _token Token for funding
   /// @param _amount Amount of funding
   /// @param _mintPrice Minimum amount of funding needed to mint an NFT
@@ -188,9 +193,6 @@ contract Funding is ERC721URIStorage, Initializable {
     _mintTokens(_sponsor);
   }
 
-
-  // ????????????????????????????????
-  /* ###################withdrawEth() could be rewritten using an enumerable set of addresses that can withdraw ETH from the contract */
 
   /// @notice Checks that an address has ETH in the contract that can be withdrawn using withdrawEth()
   function _mayWithdrawEth(address _msgSender) private view returns (bool) {
@@ -211,17 +213,18 @@ contract Funding is ERC721URIStorage, Initializable {
 
 
   /// @notice Check that msg.sender is authorized contract owner
+  /// @param _msgSender The address to check whether it is the authorized contract owner
   function _isAuthorizedOwner(address _msgSender) private view returns (bool) {
     address changeDaoContractOwner = IChangeDao(changeDaoContract).owner();
 
     if (_msgSender == changeDaoContractOwner) {
       return true;
-    } else if(_msgSender == changeMakerCloneOwner) {
+    } else if (_msgSender == changeMakerCloneOwner) {
       return true;
     } else return false;
   }
 
-  /* @notice The changeMaker and changeDaoContractOwner are authorized to terminate the project so it will no longer receive funding or mint*/
+  /* @notice Only changeMakerCloneOwner and changeDaoContractOwner are authorized to terminate the project so it will no longer receive funding or mint*/
   function terminateProject() public {
     require(_isAuthorizedOwner(msg.sender), "Not authorized to terminate project");
     /// @notice Setting the value to zero causes fund() to revert

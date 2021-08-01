@@ -1,3 +1,5 @@
 1. Fallback/receive functions for all contracts. Does there need to be a function to withdraw eth that ends up in a contract through the fallback/receive funtions?
 
-2. Should the types of funding tokens be held in an enumerable set or should this just be hardcoded using constant variables since there are only two for the MVP, DAI and USDC?  Normally, this would be bad coding style, but what is the better solution here?
+2. Should the types of funding tokens be held in an enumerable set or should this just be hardcoded using constant variables since there are only two for the MVP, DAI and USDC?  Normally, this would be bad coding style, but what is the better solution here? This would get rid of permittedTokens as a state variable.
+
+3. What should be the names/symbols for the NFTs set in the constructors?

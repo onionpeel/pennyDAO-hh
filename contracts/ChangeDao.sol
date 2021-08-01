@@ -17,6 +17,7 @@ contract ChangeDao is Ownable, ERC721 {
   ///Percentages are stored as basis points
   uint16 public changeMakerPercentage = 9800;
   uint16 public changeDaoPercentage = 100;
+
   address payable public changeDaoWallet;
   address payable public communityFundWallet;
 
@@ -29,7 +30,8 @@ contract ChangeDao is Ownable, ERC721 {
   mapping (uint256 => address) public changeMakerClones;
 
   /// @notice ChangeDao is deployed as an ERC721 contract
-  /// @param _communityFundWallet Address that controls funds for the community fund
+  /// @param _communityFundWallet Address that controls funds for the community fund wallet
+  /// @param _changeDaoWallet Address that controls funds for the changeDao wallet
   constructor(address payable _communityFundWallet, address payable _changeDaoWallet)
     ERC721('ChangeDAO', 'CHNDv1IMPL')
   {
@@ -38,30 +40,31 @@ contract ChangeDao is Ownable, ERC721 {
     changeMakerImplementation = address(new ChangeMaker(address(this)));
   }
 
+  /// @notice Contract accepts ETH sent directly to it
   receive() external payable {}
 
-  /// @notice The ChangeDao contract owner grants approval to become a changemaker
+  /// @notice The ChangeDao contract owner must first grant approval to become a changemaker
   /// @dev Only the contract owner (changeDao) can call this function
   /// @param _newChangeMaker The address that will be added to the mapping of approved changemakers
   function approveNewChangeMaker(address _newChangeMaker) public onlyOwner {
     approvedChangeMakers[_newChangeMaker] = true;
   }
 
-  /// @notice The contract owner removes a changemaker's approval status
-  /// @param _changeMaker Address to be set to false in approvedChangeMakers mapping
+  /// @notice The changeDao contract owner removes a changemaker's approval status
+  /// @param _changeMaker Address to be set to false in the approvedChangeMakers mapping
   function removeApproval(address _changeMaker) public onlyOwner {
     approvedChangeMakers[_changeMaker] = false;
   }
 
-  /* @notice In order to save on storage, the communityFundPercentage is not a variable.  Instead, it is calculated whenever it is needed based on the other two percentages.*/
+  /* @notice In order to save on storage, there is no communityFundPercentage variable.  Instead, it is calculated whenever it is needed based on the other two percentages.*/
   function getCommunityFundPercentage() external view returns (uint16){
     return 10000 - (changeMakerPercentage + changeDaoPercentage);
   }
 
   /// @notice All percentages must be expressed as basis points (96.75% => 9675)
-  /// @param _changeMakerPercentage changeMaker share
-  /// @param _changeDaoPercentage changeDao share
-  /// @param _communityFundPercentage communityFund share
+  /// @param _changeMakerPercentage changeMakerCloneOwner share
+  /// @param _changeDaoPercentage changeDaoWallet share
+  /// @param _communityFundPercentage communityFundWallet share
   function setPercentageDistributions(
     uint16 _changeMakerPercentage,
     uint16 _changeDaoPercentage,
@@ -75,21 +78,20 @@ contract ChangeDao is Ownable, ERC721 {
     changeDaoPercentage = _changeDaoPercentage;
   }
 
-
-  /// @notice Approved changeMakers can register
-  /* @dev A clone from the changeMakerImplementation is created. An NFT is minted for the changeMaker's address.  The clone is mapped to the changeMaker's NFT token id.  Then the clone is initialized.*/
+  /// @notice Only approved changeMakers can register
+  /* @dev A clone is created using the changeMakerImplementation. An NFT is minted for the changeMaker's address.  The clone is mapped to the changeMaker's NFT token id.  Then the clone is initialized.*/
   function registerChangeMaker() public {
     require(approvedChangeMakers[msg.sender] == true,
       "ChangeMaker needs to be approved in order to register");
-
+    /// @notice A clone is created using the changeMakerImplementation
     address payable changeMakerClone = payable(Clones.clone(changeMakerImplementation));
 
     changeMakerTokenId.increment();
     uint256 currentToken = changeMakerTokenId.current();
-
+    /* @notice An NFT is minted for the changeMaker's address and is mapped to the changeMaker's NFT token id */
     _safeMint(msg.sender, currentToken);
     changeMakerClones[currentToken] = changeMakerClone;
-
+    /// @notice The changeMakerClone is initialized
     ChangeMaker(changeMakerClone).initialize(msg.sender);
   }
 

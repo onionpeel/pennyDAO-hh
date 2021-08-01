@@ -32,6 +32,7 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
     projectImplementation = address(new Project());
   }
 
+  /// @notice Contract accepts ETH sent directly to it
   receive() external payable {}
 
   /// @notice This replaces a constructor in clones
@@ -92,12 +93,13 @@ contract ChangeMaker is ERC721, Ownable, Initializable {
   }
 
   /// @notice Receives donations in ETH, DAI or USDC
+  /// @param _changeMakerCloneOwner The owner of the changeMaker clone
   /// @param _token Token for funding
   /// @param _amount Funding amount
-  function donate(address _token, uint256 _amount) public payable {
+  function donate(address _changeMakerCloneOwner, address _token, uint256 _amount) public payable {
     require(_isTokenAccepted(_token), "Donations must be in ETH, DAI or USDC");
 
-    IERC20(_token).safeTransferFrom(msg.sender, owner(), _amount);
+    IERC20(_token).safeTransferFrom(msg.sender, _changeMakerCloneOwner, _amount);
   }
 
   /* @notice Only changeMaker clone owner can withdraw the ETH balance from the contract */

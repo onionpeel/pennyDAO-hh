@@ -4,16 +4,22 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "./Funding.sol";
-
-interface IFunding {
-  function fund(address, uint256, uint256, address) external payable returns (bool);
-}
 
 
 contract Project is ERC721, Initializable {
+  using Counters for Counters.Counter;
+  Counters.Counter public fundingCloneTokenId;
 
-  constructor() ERC721("Project", "PRJTv1") {}
+  address immutable fundingCloneImplementation;
+
+  /// @notice Maps NFT fundingClone token id to funding clone
+  mapping (uint256 => address) public fundingClones;
+
+  constructor() ERC721("Project", "PRJTv1") {
+    fundingCloneImplementation = address(new Funding());
+  }
 
   /// @notice Initialize a project clone
   /* @dev This function is called immediately after the project clone is created by a changeMaker clone */
@@ -34,8 +40,14 @@ contract Project is ERC721, Initializable {
     require(_mintPrice > 0, "Mint price must be larger than zero");
     require(_mintTotal > 0, "Mint total must be larger than zero");
 
-    address fundingImplementation = address(new Funding());
-    address payable fundingClone = payable(Clones.clone(fundingImplementation));
+    address payable fundingClone = payable(Clones.clone(fundingCloneImplementation));
+
+    /// @notice Increment fundingClone token id
+    fundingCloneTokenId.increment();
+    uint256 currentToken = fundingCloneTokenId.current();
+    /// @notice Mint changeMaker's new project NFT that maps to the project clone
+    _safeMint(msg.sender, currentToken);
+    fundingClones[currentToken] = fundingClone;
 
     Funding(fundingClone).initialize(
       _mintPrice,
